@@ -2,22 +2,29 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const email = body.email;
-  const password = body.password;
+  try {
+    const body = await req.json();
+    const { email, password } = body;
 
-  if (!email || !password) {
-    return NextResponse.json({ message: "Vnesi email in geslo." });
+    if (!email || !password) {
+      return NextResponse.json({ message: "Vnesi email in geslo." }, { status: 400 });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json({ message: "Uporabnik že obstaja." }, { status: 400 });
+    }
+
+    await prisma.user.create({
+      data: { email, password },
+    });
+
+    return NextResponse.json({ message: "Uporabnik uspešno registriran!" });
+  } catch (error) {
+    console.error("Napaka pri registraciji:", error);
+    return NextResponse.json({ message: "Napaka strežnika." }, { status: 500 });
   }
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (user) {
-    return NextResponse.json({ message: "Uporabnik že obstaja." });
-  }
-
-  await prisma.user.create({
-    data: { email, password },
-  });
-
-  return NextResponse.json({ message: "Uporabnik uspešno registriran!" });
 }
