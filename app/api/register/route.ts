@@ -4,10 +4,13 @@ import { prisma } from "@/app/lib/prisma";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password } = body;
+    const { email, password, name } = body; // dodamo name
 
-    if (!email || !password) {
-      return NextResponse.json({ message: "Vnesi email in geslo." }, { status: 400 });
+    if (!email || !password || !name) {
+      return NextResponse.json(
+        { message: "Vnesi ime, email in geslo." },
+        { status: 400 }
+      );
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -19,7 +22,11 @@ export async function POST(req: Request) {
     }
 
     await prisma.user.create({
-      data: { email, password },
+      data: {
+        email,
+        password,
+        name, // zdaj pošiljamo name
+      },
     });
 
     return NextResponse.json({ message: "Uporabnik uspešno registriran!" });
