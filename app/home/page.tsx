@@ -2,39 +2,18 @@
 
 import { useEffect, useState } from "react";
 
-interface EventWithUser {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  user: {
-    name?: string;
-    email: string;
-  };
-}
-
-interface UserData {
-  id: string;
-  email: string;
-  name?: string;
-}
-
 export default function HomePage() {
-  const [events, setEvents] = useState<EventWithUser[]>([]);
-  const [user, setUser] = useState<UserData | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
 
-  // Naloži uporabnika iz localStorage
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  // Naloži dogodke iz API-ja
-  useEffect(() => {
-    async function fetchEvents() {
+  useEffect(function () {
+    async function loadData() {
       try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+
         const res = await fetch("/api/events");
         const data = await res.json();
         setEvents(data.events || []);
@@ -42,31 +21,34 @@ export default function HomePage() {
         console.error("Napaka pri nalaganju dogodkov:", err);
       }
     }
-    fetchEvents();
+
+    loadData();
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col p-4">
-      {user && (
-        <h2 className="text-xl font-semibold mb-4 text-center">
-          Pozdravljen, {user.name ? user.name : user.email}!
+    <main className="min-h-screen flex flex-col p-4 text-center">
+      {user ? (
+        <h2 className="text-xl font-semibold mb-4">
+          Pozdravljen, {user?.name || user?.email}!
         </h2>
-      )}
+      ) : null}
 
-      <h1 className="text-2xl font-bold mb-4 text-center">Prihajajoči dogodki</h1>
+      <h1 className="text-2xl font-bold mb-4">Prihajajoči dogodki</h1>
 
       <div className="grid md:grid-cols-3 gap-4">
-        {events.map((event) => (
-          <div key={event.id} className="border p-4 rounded-lg shadow">
-            <h2 className="font-semibold">{event.title}</h2>
-            <p>
-              {new Date(event.date).toLocaleDateString("sl-SI")} • {event.location}
-            </p>
-            <p className="text-sm text-gray-500">
-              Ustvaril: {event.user?.name ? event.user.name : "Neznan uporabnik"}
-            </p>
-          </div>
-        ))}
+        {events.map(function (event: any) {
+          return (
+            <div key={event.id} className="border p-4 rounded-lg shadow">
+              <h2 className="font-semibold">{event.title}</h2>
+              <p>
+                {new Date(event.date).toLocaleDateString("sl-SI")} • {event.location}
+              </p>
+              <p className="text-sm text-gray-500">
+                Ustvaril: {event.user?.name || "Neznan uporabnik"}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </main>
   );
