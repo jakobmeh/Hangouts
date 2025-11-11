@@ -1,25 +1,46 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
-    setMessage(data.message);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.message || "Napaka pri prijavi.");
+      } else {
+        // Shranimo celotnega uporabnika, da lahko uporabljamo name
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Preusmeritev na home page
+        router.push("/home");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setMessage("Napaka pri povezavi s strežnikom.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -48,14 +69,13 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
+          disabled={loading}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200 disabled:opacity-50"
         >
-          Prijava
+          {loading ? "Prijavljanje..." : "Prijava"}
         </button>
 
-        {message && (
-          <p className="mt-4 text-red-500 font-medium">{message}</p>
-        )}
+        {message && <p className="mt-4 text-red-500 font-medium">{message}</p>}
       </form>
     </div>
   );
