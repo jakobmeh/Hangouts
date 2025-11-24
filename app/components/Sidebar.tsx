@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export type UserType = {
   id: number;
@@ -15,6 +16,8 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ user, search, setSearch }: SidebarProps) {
+  const router = useRouter();
+
   return (
     <motion.div
       initial={{ x: -100, opacity: 0 }}
@@ -41,12 +44,20 @@ export default function Sidebar({ user, search, setSearch }: SidebarProps) {
       />
 
       {/* Navigation / Categories */}
-      <div className="flex flex-col gap-3 text-gray-700">
+      <div className="flex flex-col gap-3 text-gray-700 mb-6">
         <button className="text-left hover:text-blue-600 transition">Vsi dogodki</button>
         <button className="text-left hover:text-blue-600 transition">Šport</button>
         <button className="text-left hover:text-blue-600 transition">Programiranje</button>
         <button className="text-left hover:text-blue-600 transition">Druženje</button>
       </div>
+
+      {/* Gumb za dodajanje dogodka */}
+      <button
+        onClick={() => router.push("/add-event")}
+        className="mt-auto bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        Dodaj dogodek
+      </button>
     </motion.div>
   );
 }
