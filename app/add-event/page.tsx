@@ -50,7 +50,7 @@ export default function AddEventPage() {
         setMessage(data.message || "Napaka pri dodajanju dogodka.");
       } else {
         setMessage("Dogodek uspešno dodan!");
-        // Po želji preusmeritev na home page
+       
         router.push("/home");
       }
     } catch (err) {

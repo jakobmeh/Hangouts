@@ -21,11 +21,11 @@ export default function HomePage() {
 
   useEffect(() => {
     async function loadData() {
-      // Load user from localStorage
+     
       const storedUser = localStorage.getItem("user");
       if (storedUser) setUser(JSON.parse(storedUser));
 
-      // Fetch events from API
+      
       try {
         const res = await fetch("/api/events");
         const data = await res.json();
@@ -38,7 +38,7 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  // Filter events by search
+ 
   const filtered = events.filter((event) => {
     const s = search.toLowerCase();
     return (
@@ -51,10 +51,9 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Include Sidebar */}
+     
       <Sidebar user={user} search={search} setSearch={setSearch} />
 
-      {/* Main content */}
       <div className="flex-1 p-6">
         <h1 className="text-4xl font-bold mb-8 text-gray-900">Prihajajoči dogodki</h1>
 
