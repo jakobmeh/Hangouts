@@ -10,20 +10,24 @@ export default function RegisterForm() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-<<<<<<< Updated upstream
   const handleRegister = async () => {
     setLoading(true);
     setMessage("");
 
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    const data = await res.json();
-    setMessage(data.message);
-    setLoading(false);
+      const data = await res.json();
+      setMessage(data.message);
+    } catch (err) {
+      setMessage("Prišlo je do napake. Poskusi ponovno.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,53 +76,6 @@ export default function RegisterForm() {
           <p className="mt-4 text-red-500 font-semibold">{message}</p>
         )}
       </motion.div>
-=======
-  async function handleRegister() {
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
-    })
-
-    const data = await res.json()
-    setMessage(data.message)
-  }
-
-  return (
-    <div className="flex flex-col gap-4 max-w-sm mx-auto p-4">
-      <input
-        type="text"
-        placeholder="Ime"
-        value={name}
-        onChange={function(e) { setName(e.target.value) }}
-        className="border px-3 py-2 rounded"
-      />
-
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={function(e) { setEmail(e.target.value) }}
-        className="border px-3 py-2 rounded"
-      />
-
-      <input
-        type="password"
-        placeholder="Geslo"
-        value={password}
-        onChange={function(e) { setPassword(e.target.value) }}
-        className="border px-3 py-2 rounded"
-      />
-
-      <button
-        onClick={handleRegister}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Registriraj
-      </button>
-
-      {message && <p className="text-red-500 mt-2">{message}</p>}
->>>>>>> Stashed changes
     </div>
   );
 }
