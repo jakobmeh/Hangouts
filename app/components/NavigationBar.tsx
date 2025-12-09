@@ -7,14 +7,14 @@ export default function NavigationBar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="w-full bg-white shadow px-6 py-4 flex items-center justify-between border-b border-gray-200">
+    <header className="w-full bg-gray-100 px-6 py-4 flex items-center justify-between border-b border-gray-200">
       
       <div className="flex items-center gap-6">
          <Image
-            src="/icons/logo.png"
+            src="/icons/Meetup.png"
             alt="logo"
-            width={65}
-            height={65}
+            width={85}
+            height={85}
           />
 
         <input
@@ -26,14 +26,15 @@ export default function NavigationBar() {
 
       <div className="relative flex items-center gap-6 text-gray-700">
 
-        <button className="hover:text-blue-600">    <Image
+        <button className="hover:text-blue-600">
+          <Image
             src="/icons/comment.png"
             alt="notifications"
             width={24}
             height={24}
-          /></button>
+          />
+        </button>
 
-        {/* Notification icon PNG */}
         <button className="hover:opacity-60 transition">
           <Image
             src="/icons/notification.png"
@@ -43,12 +44,14 @@ export default function NavigationBar() {
           />
         </button>
 
-        <button className="hover:text-blue-600 text-xl"> <Image
+        <button className="hover:text-blue-600 text-xl">
+          <Image
             src="/icons/support.png"
             alt="notifications"
             width={24}
             height={24}
-          /></button>
+          />
+        </button>
 
         <div
           className="flex items-center gap-2 cursor-pointer select-none"
@@ -60,12 +63,17 @@ export default function NavigationBar() {
             className="text-lg transition-transform"
             style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
           >
-            ⌄
+            <Image
+            src="/icons/arrow-down-sign-to-navigate.png"
+            alt="Dropdown"
+            width={10}
+            height={10}
+          />
           </span>
         </div>
 
         {open && (
-          <div className="absolute right-0 top-14 bg-white shadow-lg border border-gray-200 rounded-lg w-40 py-2 z-20">
+          <div className="absolute right-0 top-14 bg-white border border-gray-200 rounded-lg w-40 py-2 z-20">
             <button className="w-full text-left px-4 py-2 hover:bg-gray-100">
               Profil
             </button>
