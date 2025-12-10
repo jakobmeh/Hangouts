@@ -3,69 +3,91 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🟢 Začenjam polnjenje baze...");
+  console.log("🌱 Seeding database...");
 
-  // --- Uporabniki ---
-  const users = await prisma.user.createMany({
+  // --- USERS ---
+  await prisma.user.createMany({
     data: [
-      { email: "janez@gmail.com", name: "Janez Novak", password: "123456" },
-      { email: "ana@gmail.com", name: "Ana Kovač", password: "geslo123" },
-      { email: "marko@gmail.com", name: "Marko Horvat", password: "pass321" },
+      { email: "ana@gmail.com", name: "Ana", password: "123" },
+      { email: "marko@gmail.com", name: "Marko", password: "123" },
     ],
   });
 
-  console.log(`✅ Dodanih ${users.count} uporabnikov.`);
-
-  // --- Dogodki ---
-  const janez = await prisma.user.findUnique({ where: { email: "janez@gmail.com" } });
-  const ana = await prisma.user.findUnique({ where: { email: "ana@gmail.com" } });
-  const marko = await prisma.user.findUnique({ where: { email: "marko@gmail.com" } });
-
+  // --- EVENTS ---
   await prisma.event.createMany({
     data: [
       {
-        title: "Glasbeni festival Ljubljana",
-        date: new Date("2025-07-20"),
-        location: "Ljubljana, Kongresni trg",
-        userId: janez!.id,
+        title: "Tech Meetup Ljubljana",
+        description: "A meetup focused on developers and new technologies.",
+        date: new Date("2025-02-15T18:00:00"),
+        
+        city: "Ljubljana",
+        country: "Slovenia",
+        countryCode: "SI",
+
+        imageUrl: null,
+        category: "Technology",
+        capacity: 100,
+
+        userId: 1,
       },
       {
-        title: "Športni dan v Celju",
-        date: new Date("2025-06-15"),
-        location: "Celje, Stadion Z'dežele",
-        userId: ana!.id,
+        title: "Football Fans Gathering Celje",
+        description: "Live match viewing with local football enthusiasts.",
+        date: new Date("2025-03-10T16:00:00"),
+
+        city: "Celje",
+        country: "Slovenia",
+        countryCode: "SI",
+
+        imageUrl: null,
+        category: "Sports",
+        capacity: 200,
+
+        userId: 1,
       },
       {
-        title: "Startup vikend Maribor",
-        date: new Date("2025-09-10"),
-        location: "Maribor, Tovarna Podjemov",
-        userId: marko!.id,
+        title: "Startup Meetup Maribor",
+        description: "Entrepreneurs meet, pitch & brainstorm ideas.",
+        date: new Date("2025-04-05T17:00:00"),
+
+        city: "Maribor",
+        country: "Slovenia",
+        countryCode: "SI",
+
+        imageUrl: null,
+        category: "Business",
+        capacity: 150,
+
+        userId: 2,
       },
       {
-        title: "Stand-up večer",
-        date: new Date("2025-05-25"),
-        location: "Kranj, Layerjeva hiša",
-        userId: ana!.id,
-      },
-      {
-        title: "Boxing Night",
-        date: new Date("2025-12-01"),
-        location: "Ljubljana, Dvorana Tivoli",
-        userId: janez!.id,
+        title: "Photography Walk Kranj",
+        description: "Learn photography outdoors with pro photographers.",
+        date: new Date("2025-05-01T10:00:00"),
+
+        city: "Kranj",
+        country: "Slovenia",
+        countryCode: "SI",
+
+        imageUrl: null,
+        category: "Art",
+        capacity: 50,
+
+        userId: 2,
       },
     ],
   });
 
-  console.log("✅ Dogodki uspešno dodani!");
+  console.log("✔ Seed completed!");
 }
 
 main()
-  .then(() => {
-    console.log("🎉 Seed končan.");
-    prisma.$disconnect();
+  .then(async () => {
+    await prisma.$disconnect();
   })
-  .catch((e) => {
-    console.error("❌ Napaka pri seedanju:", e);
-    prisma.$disconnect();
+  .catch(async (err) => {
+    console.error("❌ Seed failed:", err);
+    await prisma.$disconnect();
     process.exit(1);
   });

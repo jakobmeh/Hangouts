@@ -31,7 +31,7 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
         setMessage(data.message || "Napaka pri prijavi.");
       } else {
         localStorage.setItem("user", JSON.stringify(data.user));
-        router.push("/home");
+        router.push("/");
       }
     } catch (error) {
       console.error("Fetch error:", error);
