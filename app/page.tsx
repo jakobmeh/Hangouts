@@ -1,59 +1,60 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
-import NavigationBar from "./components/NavigationBar"
-import Footer from "./components/Footer"
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import NavigationBar from "./components/NavigationBar";
+import Footer from "./components/Footer";
+
 export type UserType = {
-  id: number
-  email: string
-  name?: string | null
-}
+  id: number;
+  email: string;
+  name?: string | null;
+};
 
 export type EventType = {
-  id: number
-  title: string
-  date: string
-  location: string
-  imageUrl?: string | null
-  userId: number
-  user: { id: number; email: string; name?: string | null } | null
-}
+  id: number;
+  title: string;
+  date: string;
+  location: string;
+  imageUrl?: string | null;
+  userId: number;
+  user: { id: number; email: string; name?: string | null } | null;
+};
 
 export default function HomePage() {
-  const [events, setEvents] = useState<EventType[]>([])
-  const [user, setUser] = useState<UserType | null>(null)
-  const [search, setSearch] = useState("")
+  const [events, setEvents] = useState<EventType[]>([]);
+  const [user, setUser] = useState<UserType | null>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function loadData() {
-      const storedUser = localStorage.getItem("user")
-      if (storedUser) setUser(JSON.parse(storedUser))
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) setUser(JSON.parse(storedUser));
 
       try {
-        const res = await fetch("/api/events")
-        const data = await res.json()
-        setEvents(data.events || [])
+        const res = await fetch("/api/events");
+        const data = await res.json();
+        setEvents(data.events || []);
       } catch (err) {
-        console.error("Napaka pri nalaganju dogodkov:", err)
+        console.error("Napaka pri nalaganju dogodkov:", err);
       }
     }
 
-    loadData()
-  }, [])
+    loadData();
+  }, []);
 
   const filtered = events.filter((event) => {
-    const s = search.toLowerCase()
+    const s = search.toLowerCase();
     return (
       event.title.toLowerCase().includes(s) ||
       event.location.toLowerCase().includes(s) ||
       event.user?.name?.toLowerCase().includes(s) ||
       event.user?.email?.toLowerCase().includes(s)
-    )
-  })
+    );
+  });
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col" style={{ backgroundColor: '#f5f5f5' }}>
+    <div className="min-h-screen bg-gray-100 flex flex-col" style={{ backgroundColor: "#f5f5f5" }}>
       <NavigationBar />
 
       <div className="flex flex-1 p-6 gap-6">
@@ -62,9 +63,11 @@ export default function HomePage() {
           {/* Profil */}
           <div className="bg-white p-4 rounded-xl border border-gray-200 flex flex-col items-center">
             <div className="w-20 h-20 bg-gray-300 rounded-full mb-2"></div>
+
             <h2 className="font-semibold text-gray-800 text-center">
               {user?.name || "Neznan uporabnik"}
             </h2>
+
             <p className="text-gray-500 text-sm text-center">{user?.email}</p>
           </div>
 
@@ -91,9 +94,7 @@ export default function HomePage() {
 
         {/* Desni glavni del */}
         <main className="flex-1 bg-white p-6 rounded-xl border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-gray-900">
-            From groups you are part of
-          </h1>
+          <h1 className="text-2xl font-bold mb-4 text-gray-900">From groups you are part of</h1>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             {filtered.map((event) => (
@@ -122,7 +123,8 @@ export default function HomePage() {
           </div>
         </main>
       </div>
-       <Footer />
+
+      <Footer />
     </div>
-  )
+  );
 }
