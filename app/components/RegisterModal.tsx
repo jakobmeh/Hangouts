@@ -1,0 +1,111 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function RegisterModal({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+      setMessage(data.message);
+
+      if (res.ok) {
+        // ➜ Čez 1 sekundo preusmeri na login modal
+        setTimeout(() => {
+          onClose();
+          router.push("/"); // ostaneš na page, modal pa tlakuješ v navbar
+        }, 1000);
+      }
+
+    } catch (err) {
+      setMessage("Prišlo je do napake. Poskusi ponovno.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+
+      {/* 🌫 Blur ozadje */}
+      <div
+        className="absolute inset-0 backdrop-blur-md bg-black/20"
+        onClick={onClose}
+      />
+
+      {/* MODAL WINDOW */}
+      <form
+        onSubmit={handleRegister}
+        className="relative bg-white p-8 rounded-2xl shadow-xl w-96 border border-gray-200 z-10"
+      >
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-500 text-xl hover:text-gray-700"
+        >
+          ✕
+        </button>
+
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">Sign up</h1>
+
+        <input
+          type="text"
+          placeholder="Full name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full p-3 mb-4 border border-gray-300 rounded-xl"
+          required
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 mb-4 border border-gray-300 rounded-xl"
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-3 mb-6 border border-gray-300 rounded-xl"
+          required
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 disabled:opacity-50"
+        >
+          {loading ? "Signing up..." : "Create account"}
+        </button>
+
+        {message && (
+          <p className="mt-4 text-gray-700 text-sm font-medium">{message}</p>
+        )}
+      </form>
+    </div>
+  );
+}

@@ -28,70 +28,25 @@ export default function SearchPage() {
   const cityQuery = params.get("city")?.trim() || "";
 
   const [events, setEvents] = useState<EventType[]>([]);
-  const [loaded, setLoaded] = useState(false); // <-- pomembno, da ne pokaže fallback home page
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     async function loadData() {
-      const res = await fetch("/api/events");
+      // 🔥 UPORABI NOV FILTER API
+      const url =
+        `/api/filter?event=${encodeURIComponent(eventQuery)}&city=${encodeURIComponent(cityQuery)}`;
+
+      const res = await fetch(url);
       const data = await res.json();
 
-      let filtered = data.events as EventType[];
-
-      if (!filtered) {
-        setEvents([]);
-        setLoaded(true);
-        return;
-      }
-
-      // ---------------------------
-      // 1️⃣ FILTER BY EVENT NAME
-      // ---------------------------
-      if (eventQuery.length > 0) {
-        filtered = filtered.filter((e) =>
-          e.title.toLowerCase().includes(eventQuery.toLowerCase())
-        );
-      }
-
-      // ---------------------------
-      // 2️⃣ FILTER BY CITY / COUNTRY
-      // supports: "Celje", "Slovenija", "Celje, Slovenija"
-      // ---------------------------
-      if (cityQuery.length > 0) {
-        const parts = cityQuery.split(",").map((p) => p.trim().toLowerCase());
-
-        const queryCity = parts[0] || "";
-        const queryCountry = parts[1] || "";
-
-        filtered = filtered.filter((e) => {
-          const city = e.city?.toLowerCase() || "";
-          const country = e.country?.toLowerCase() || "";
-
-          // če ima uporabnik vpisan SAMO "Celje"
-          if (queryCity && !queryCountry) {
-            return city.includes(queryCity);
-          }
-
-          // če ima uporabnik vpisan SAMO "Slovenija"
-          if (!queryCity && queryCountry) {
-            return country.includes(queryCountry);
-          }
-
-          // če ima vpisano "Celje, Slovenija"
-          return (
-            (queryCity && city.includes(queryCity)) &&
-            (queryCountry && country.includes(queryCountry))
-          );
-        });
-      }
-
-      setEvents(filtered);
+      setEvents(data.events || []);
       setLoaded(true);
     }
 
     loadData();
   }, [eventQuery, cityQuery]);
 
-  // 🟥 dokler se API ne naloži, ne smemo nič risati → drugače Next vrne fallback HTML
+  // Dokler čakamo na rezultat
   if (!loaded) {
     return <div className="p-6 text-gray-500">Loading...</div>;
   }
