@@ -7,20 +7,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//
+// ────────────────────────────────────────────
+// USER
+// ────────────────────────────────────────────
+// A registered user that can create events and join events
+//
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  name     String?
-  password String
-  events   Event[]
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String?
+  password  String
+
+  // Relations
+  events    Event[]        // events created by user
+  attending Attendee[]     // events user joined
 }
 
+//
+// ────────────────────────────────────────────
+// EVENT
+// ────────────────────────────────────────────
+// Meetup-style event with location, description, category, capacity
+//
 model Event {
-  id       Int      @id @default(autoincrement())
-  title    String
-  date     DateTime
-  location String
-  imageUrl String?
-  userId   Int
-  user     User     @relation(fields: [userId], references: [id])
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  date        DateTime
+
+  // Location fields
+  city        String
+  country     String
+  countryCode String?    // for flags: SI, AT, IT, US, ...
+
+  // Optional data
+  imageUrl    String?
+  category    String?
+  capacity    Int?
+
+  // Creator
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+
+  // People attending this event
+  attendees   Attendee[]
+}
+
+//
+// ────────────────────────────────────────────
+// ATTENDEE
+// ────────────────────────────────────────────
+// A join table: User ↔ Event (many-to-many)
+// Prevents duplicate joins via @@unique
+//
+model Attendee {
+  id      Int    @id @default(autoincrement())
+  userId  Int
+  eventId Int
+
+  user   User  @relation(fields: [userId], references: [id])
+  event  Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId]) // A user can join the same event only once
 }

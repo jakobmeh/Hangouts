@@ -3,8 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { MdLocationOn } from "react-icons/md";
+import { useRouter } from "next/navigation";
 
 export default function NavigationBar() {
+  const router = useRouter();
+
   const [open, setOpen] = useState(false);
 
   // Search fields
@@ -46,6 +49,16 @@ export default function NavigationBar() {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
+  // Handle SEARCH BUTTON
+  function handleSearch() {
+    const params = new URLSearchParams();
+
+    if (eventQuery.trim()) params.set("event", eventQuery.trim());
+    if (cityQuery.trim()) params.set("city", cityQuery.trim());
+
+    router.push(`/search?${params.toString()}`);
+  }
+
   return (
     <header className="w-full bg-gray-100 px-6 py-4 flex items-center justify-between border-b border-gray-200">
       
@@ -56,29 +69,29 @@ export default function NavigationBar() {
         <Image src="/icons/Meetup.png" alt="logo" width={85} height={85} />
 
         {/* SEARCH BAR WRAPPER */}
-        <div className="flex items-center bg-gray-200/60 rounded-full px-3 py-2 shadow-inner gap-3 w-[500px] relative">
+        <div className="flex items-center bg-gray-200/60 rounded-full px-4 py-2 shadow-inner gap-3 w-[550px] relative">
 
           {/* LEFT INPUT — SEARCH EVENTS */}
           <input
             type="text"
-            placeholder="Search events..."
+            placeholder="Search for anything..."
             value={eventQuery}
             onChange={(e) => setEventQuery(e.target.value)}
-            className="flex-1 bg-white/70 outline-none px-3 text-gray-900 placeholder-gray-500 rounded-md"
+            className="flex-1 bg-white/70 outline-none px-3 text-gray-900 placeholder-gray-500 rounded-md h-9"
           />
 
           {/* DIVIDER */}
           <div className="w-[1px] h-6 bg-gray-300"></div>
 
           {/* RIGHT INPUT — LOCATION */}
-          <div className="relative w-44">
+          <div className="relative w-48">
             <input
               type="text"
               placeholder="Location"
               value={cityQuery}
               onChange={(e) => setCityQuery(e.target.value)}
               onFocus={() => cityQuery.length >= 2 && setShowDropdown(true)}
-              className="w-full bg-white/70 outline-none px-3 text-gray-900 placeholder-gray-500 rounded-md"
+              className="w-full bg-white/70 outline-none px-3 text-gray-900 placeholder-gray-500 rounded-md h-9"
             />
 
             {/* CLEAR BUTTON */}
@@ -88,7 +101,7 @@ export default function NavigationBar() {
                   setCityQuery("");
                   setShowDropdown(false);
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
               >
                 ✕
               </button>
@@ -96,7 +109,7 @@ export default function NavigationBar() {
 
             {/* AUTOCOMPLETE DROPDOWN */}
             {showDropdown && cityResults.length > 0 && (
-              <div className="absolute top-10 left-0 w-full bg-white shadow-lg rounded-xl z-20 border border-gray-200 p-2">
+              <div className="absolute top-11 left-0 w-full bg-white shadow-lg rounded-xl z-20 border border-gray-200 p-2">
 
                 <p className="text-xs text-gray-700 px-2 mb-2 font-semibold">
                   CITY
@@ -122,7 +135,10 @@ export default function NavigationBar() {
           </div>
 
           {/* SEARCH BUTTON */}
-          <button className="bg-black text-white rounded-full p-3 hover:bg-gray-800">
+          <button
+            onClick={handleSearch}
+            className="bg-black text-white rounded-full p-3 hover:bg-gray-800"
+          >
             <Image src="/icons/search-interface-symbol.png" alt="Search" width={18} height={18} />
           </button>
         </div>
