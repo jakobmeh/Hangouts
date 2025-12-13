@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 import { prisma } from "@/app/lib/prisma";
 
 export async function GET() {
@@ -18,7 +17,10 @@ export async function POST(req: Request) {
   const { name, description, city, country, ownerId } = body;
 
   if (!name || !city || !ownerId) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing fields" },
+      { status: 400 }
+    );
   }
 
   const group = await prisma.group.create({

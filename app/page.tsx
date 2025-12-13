@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import NavigationBar from "./components/NavigationBar";
 import Footer from "./components/Footer";
 import RegisterModal from "./components/RegisterModal";
+import { useRouter } from "next/navigation";
 
 export type UserType = {
   id: number;
@@ -41,6 +42,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
 const [groups, setGroups] = useState<GroupType[]>([]);
+const router = useRouter();
 
   useEffect(() => {
   async function loadData() {
@@ -132,12 +134,15 @@ const [groups, setGroups] = useState<GroupType[]>([]);
       </section>
 {/* POPULAR GROUPS */}
 <section className="px-10 pb-24">
-  <div className="flex items-center justify-between mb-6">
+   <div className="flex items-center justify-between mb-6">
     <h2 className="text-3xl font-bold">
       Popular groups <span className="text-purple-600">near you</span>
     </h2>
 
-    <span className="text-sm text-purple-600 cursor-pointer hover:underline">
+    <span
+      onClick={() => router.push("/groups")}
+      className="text-sm text-purple-600 cursor-pointer hover:underline"
+    >
       See all groups
     </span>
   </div>
@@ -151,20 +156,25 @@ const [groups, setGroups] = useState<GroupType[]>([]);
         {/* IMAGE PLACEHOLDER */}
         <div className="h-32 bg-gray-200 rounded-lg mb-4" />
 
-        <h3 className="font-semibold text-lg mb-1">
+        {/* GROUP NAME */}
+        <h3 className="text-lg font-semibold mb-1">
           {group.name}
         </h3>
 
+        {/* LOCATION */}
         <p className="text-sm text-gray-600">
-          {group.city}{group.country ? `, ${group.country}` : ""}
+          {group.city}, {group.country}
         </p>
 
-        <p className="text-xs text-gray-500 mt-1">
+        {/* MEMBERS */}
+        <p className="text-sm text-gray-500 mt-1">
           👥 {group._count.members} members
         </p>
 
+        {/* VIEW BUTTON */}
         <button
-          className="mt-4 w-full border border-black text-black py-2 rounded-full hover:bg-black hover:text-white transition"
+          onClick={() => router.push(`/groups/${group.id}`)}
+          className="mt-4 w-full border rounded-full py-2 text-sm hover:bg-gray-100"
         >
           View group
         </button>
