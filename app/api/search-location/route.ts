@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ results: [] });
   }
 
-  // MUCH BETTER: use q= instead of city=
+  
   const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&addressdetails=1&limit=5`;
 
   const res = await fetch(url, {
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
       item.address.municipality ||
       item.address.suburb ||
       item.address.county ||
-      item.display_name.split(",")[0] || // fallback
+      item.display_name.split(",")[0] || 
       "Unknown",
 
     country: item.address.country || "",

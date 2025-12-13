@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import NavigationBar from "./components/NavigationBar";
 import Footer from "./components/Footer";
+import RegisterModal from "./components/RegisterModal";
 
 export type UserType = {
   id: number;
@@ -26,89 +27,194 @@ export default function HomePage() {
   const [events, setEvents] = useState<EventType[]>([]);
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showRegister, setShowRegister] = useState(false);
 
+  // 🔥 SYNC USER STATE (LOGIN / LOGOUT / REFRESH)
   useEffect(() => {
-    async function loadData() {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) setUser(JSON.parse(storedUser));
+    function syncUser() {
+      const stored = localStorage.getItem("user");
+      setUser(stored ? JSON.parse(stored) : null);
+    }
 
+    syncUser();
+
+    window.addEventListener("user-login", syncUser);
+    window.addEventListener("user-logout", syncUser);
+
+    return () => {
+      window.removeEventListener("user-login", syncUser);
+      window.removeEventListener("user-logout", syncUser);
+    };
+  }, []);
+
+  // LOAD EVENTS
+  useEffect(() => {
+    async function loadEvents() {
       try {
         const res = await fetch("/api/events");
         const data = await res.json();
         setEvents(data.events || []);
       } catch (err) {
         console.error("Napaka pri nalaganju dogodkov:", err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
-    loadData();
+    loadEvents();
   }, []);
 
   if (loading) return <div className="p-6">Loading...</div>;
 
-  // =====================================================================================
-  // 1️⃣ PUBLIC HOMEPAGE (ko ni prijavljen)
-  // =====================================================================================
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-white">
-        <NavigationBar />
+ 
+ if (!user) {
+  return (
+    <div className="min-h-screen bg-white relative">
+      <NavigationBar />
 
-        {/* HERO SECTION */}
-        <section className="py-20 flex flex-col items-center text-center">
-          <h1 className="text-5xl font-bold leading-tight mb-6">
-            The 🧑‍🤝‍🧑 people platform.<br />
-            Where ✨ interests become 💗 friendships.
-          </h1>
+      {/* HERO */}
+      <section className="py-20 flex flex-col items-center text-center">
+        <h1 className="text-5xl font-bold leading-tight mb-6">
+          The 🧑‍🤝‍🧑 people platform.<br />
+          Where ✨ interests become 💗 friendships.
+        </h1>
 
-          <p className="text-gray-600 max-w-2xl">
-            Join thousands of people meeting up daily. From tech meetups to hobbies,
-            find your community and make new connections.
-          </p>
+        <p className="text-gray-600 max-w-2xl">
+          Join thousands of people meeting up daily. From tech meetups to hobbies,
+          find your community and make new connections.
+        </p>
 
-          <button className="mt-6 px-6 py-3 bg-black text-white rounded-full hover:bg-gray-800">
-            Join Meetup
-          </button>
-        </section>
+        <button
+          className="mt-6 px-6 py-3 bg-black text-white rounded-full hover:bg-gray-800"
+          onClick={() => setShowRegister(true)}
+        >
+          Join Meetup
+        </button>
+      </section>
 
-        {/* EVENTS PREVIEW */}
-        <section className="px-10 pb-20">
-          <h2 className="text-3xl font-bold mb-6">
-            Events near <span className="text-purple-600">you</span>
+      {/* EVENTS PREVIEW – GLOBAL */}
+      <section className="px-10 pb-20">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold">
+            Popular events <span className="text-purple-600">around the world</span>
           </h2>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {events.slice(0, 6).map((event) => (
-              <div key={event.id} className="p-4 bg-white border rounded-xl shadow-sm">
-                <h3 className="text-xl font-semibold">{event.title}</h3>
-                <p className="text-gray-600">{event.city}, {event.country}</p>
-                <p className="text-sm text-gray-500 mt-1">
+          <span className="text-sm text-purple-600 cursor-pointer hover:underline">
+            See all events
+          </span>
+        </div>
+
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {events.slice(0, 8).map((event) => (
+            <div
+              key={event.id}
+              className="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
+            >
+              {/* IMAGE PLACEHOLDER */}
+              <div className="h-40 bg-gray-200" />
+
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">
+                  {event.title}
+                </h3>
+
+                <p className="text-sm text-gray-600">
+                  {event.city}, {event.country}
+                </p>
+
+                <p className="text-xs text-gray-500 mt-1">
                   {new Date(event.date).toLocaleDateString("sl-SI")}
                 </p>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+          ))}
+        </div>
+      </section>
 
-        <Footer />
-      </div>
-    );
-  }
+      <section className="py-24 bg-gray-50">
+  <h2 className="text-4xl font-bold text-center mb-16">
+    How Meetup works
+  </h2>
 
-  // =====================================================================================
-  // 2️⃣ LOGGED-IN DASHBOARD (tvoj layout)
-  // =====================================================================================
+  <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 px-6">
+    
+    {/* CARD 1 */}
+    <div className="bg-white rounded-3xl p-8 shadow-sm">
+      <div className="text-3xl mb-4">🔍</div>
+
+      <h3 className="text-xl font-semibold mb-2">
+        Discover events and groups
+      </h3>
+
+      <p className="text-gray-600 mb-4">
+        See who's hosting local events for all the things you love.
+      </p>
+
+      <span className="text-purple-600 font-medium cursor-pointer hover:underline">
+        Search events and groups
+      </span>
+    </div>
+
+    {/* CARD 2 */}
+    <div className="bg-white rounded-3xl p-8 shadow-sm">
+      <div className="text-3xl mb-4">👥</div>
+
+      <h3 className="text-xl font-semibold mb-2">
+        Find your people
+      </h3>
+
+      <p className="text-gray-600">
+        Connect over shared interests and enjoy meaningful experiences.
+      </p>
+    </div>
+
+    {/* CARD 3 */}
+    <div className="bg-white rounded-3xl p-8 shadow-sm">
+      <div className="text-3xl mb-4">✨</div>
+
+      <h3 className="text-xl font-semibold mb-2">
+        Start a group to host events
+      </h3>
+
+      <p className="text-gray-600 mb-4">
+        Create your own Meetup group, and draw from a community of millions.
+      </p>
+
+      <span className="text-purple-600 font-medium cursor-pointer hover:underline">
+        Start a group
+      </span>
+    </div>
+
+  </div>
+
+  {/* FOOT NOTE */}
+  <div className="text-center mt-12 text-green-600 font-medium">
+    💚 Meetup = community
+  </div>
+</section>
+
+      <Footer />
+
+      {/* REGISTER MODAL */}
+      {showRegister && (
+        <RegisterModal onClose={() => setShowRegister(false)} />
+      )}
+    </div>
+  );
+}
+
+
+
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col" style={{ backgroundColor: "#f5f5f5" }}>
       <NavigationBar />
 
       <div className="flex flex-1 p-6 gap-6">
-        {/* LEFT SIDEBAR */}
+        
         <aside className="w-64 flex-shrink-0 flex flex-col gap-4">
 
-          {/* PROFILE */}
+          
           <div className="bg-white p-4 rounded-xl border border-gray-200 flex flex-col items-center">
             <div className="w-20 h-20 bg-gray-300 rounded-full mb-2"></div>
 
@@ -119,7 +225,7 @@ export default function HomePage() {
             <p className="text-gray-500 text-sm text-center">{user?.email}</p>
           </div>
 
-          {/* YOUR EVENTS */}
+         
           <div className="bg-white p-4 rounded-xl border border-gray-200">
             <h3 className="text-gray-700 font-semibold mb-2">Your Events</h3>
             <ul className="text-gray-600 text-sm space-y-1 max-h-40 overflow-y-auto">
@@ -129,7 +235,7 @@ export default function HomePage() {
             </ul>
           </div>
 
-          {/* YOUR GROUPS */}
+         
           <div className="bg-white p-4 rounded-xl border border-gray-200">
             <h3 className="text-gray-700 font-semibold mb-2">Your Groups</h3>
             <ul className="text-gray-600 text-sm space-y-1">
@@ -141,7 +247,7 @@ export default function HomePage() {
 
         </aside>
 
-        {/* MAIN DASHBOARD CONTENT */}
+      
         <main className="flex-1 bg-white p-6 rounded-xl border border-gray-200">
           <h1 className="text-2xl font-bold mb-4 text-gray-900">From groups you are part of</h1>
 

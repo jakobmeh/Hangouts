@@ -28,10 +28,10 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
       setMessage(data.message);
 
       if (res.ok) {
-        // ➜ Čez 1 sekundo preusmeri na login modal
+        
         setTimeout(() => {
           onClose();
-          router.push("/"); // ostaneš na page, modal pa tlakuješ v navbar
+          router.push("/"); 
         }, 1000);
       }
 
@@ -45,18 +45,18 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
 
-      {/* 🌫 Blur ozadje */}
+      
       <div
         className="absolute inset-0 backdrop-blur-md bg-black/20"
         onClick={onClose}
       />
 
-      {/* MODAL WINDOW */}
+     
       <form
         onSubmit={handleRegister}
         className="relative bg-white p-8 rounded-2xl shadow-xl w-96 border border-gray-200 z-10"
       >
-        {/* Close button */}
+       
         <button
           type="button"
           onClick={onClose}

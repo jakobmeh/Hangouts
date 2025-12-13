@@ -32,7 +32,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     async function loadData() {
-      // 🔥 UPORABI NOV FILTER API
+      
       const url =
         `/api/filter?event=${encodeURIComponent(eventQuery)}&city=${encodeURIComponent(cityQuery)}`;
 
@@ -46,7 +46,7 @@ export default function SearchPage() {
     loadData();
   }, [eventQuery, cityQuery]);
 
-  // Dokler čakamo na rezultat
+ 
   if (!loaded) {
     return <div className="p-6 text-gray-500">Loading...</div>;
   }
@@ -61,7 +61,7 @@ export default function SearchPage() {
         <p className="text-gray-500 mb-4">Searching for: {eventQuery}</p>
       )}
 
-      {/* RESULTS */}
+     
       {events.length > 0 ? (
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {events.map((event) => (

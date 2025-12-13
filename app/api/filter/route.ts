@@ -8,21 +8,21 @@ export async function GET(req: Request) {
   const cityQuery = searchParams.get("city")?.toLowerCase() || "";
   const category = searchParams.get("category")?.toLowerCase() || "";
   const dateFilter = searchParams.get("date") || "";
-  const type = searchParams.get("type") || ""; // online | in-person
-  const sort = searchParams.get("sort") || ""; // soonest | recent
+  const type = searchParams.get("type") || ""; 
+  const sort = searchParams.get("sort") || ""; 
 
   let events = await prisma.event.findMany({
     include: { user: true, attendees: true },
   });
 
-  // NAME FILTER
+ 
   if (eventQuery) {
     events = events.filter(e =>
       e.title.toLowerCase().includes(eventQuery)
     );
   }
 
-  // LOCATION FILTER
+  
   if (cityQuery) {
     const parts = cityQuery.split(",").map(p => p.trim().toLowerCase());
     const city = parts[0];
@@ -39,14 +39,14 @@ export async function GET(req: Request) {
     });
   }
 
-  // CATEGORY FILTER
+  
   if (category) {
     events = events.filter(e =>
       e.category?.toLowerCase() === category
     );
   }
 
-  // DATE FILTERS
+  
   const now = new Date();
   function isWithinDays(eventDate: Date, days: number) {
     const diff = (eventDate.getTime() - now.getTime()) / (1000 * 3600 * 24);
@@ -67,7 +67,7 @@ export async function GET(req: Request) {
     events = events.filter(e => new Date(e.date).getMonth() === now.getMonth());
   }
 
-  // TYPE FILTER
+  
   if (type === "online") {
     events = events.filter(e => e.city.toLowerCase() === "online");
   }
@@ -76,7 +76,7 @@ export async function GET(req: Request) {
     events = events.filter(e => e.city.toLowerCase() !== "online");
   }
 
-  // SORTING
+ 
   if (sort === "soonest") {
     events.sort((a, b) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()

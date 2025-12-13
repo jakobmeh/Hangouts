@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // vrni uporabnika nazaj
+   
     return NextResponse.json({
       message: "Uporabnik uspešno registriran!",
       user: {

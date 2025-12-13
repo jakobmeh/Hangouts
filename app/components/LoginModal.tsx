@@ -29,11 +29,16 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
       if (!res.ok) {
         setMessage(data.message || "Napaka pri prijavi.");
       } else {
+        // ✅ SAVE USER
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // ✅ NOTIFY APP (THIS IS THE FIX)
+        window.dispatchEvent(new Event("user-login"));
+
+        // close modal + redirect
         onClose();
         router.push("/");
       }
-
     } catch (error) {
       setMessage("Napaka pri povezavi s strežnikom.");
     } finally {
@@ -43,8 +48,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-
-      {/* 🌫 ZAMEGLJENO OZADJE */}
+      {/* BACKDROP */}
       <div
         className="absolute inset-0 backdrop-blur-md bg-black/20"
         onClick={onClose}

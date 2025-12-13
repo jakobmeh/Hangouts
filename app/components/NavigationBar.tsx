@@ -14,53 +14,67 @@ export default function NavigationBar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
 
-  // MODAL STATES
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
-  // Load user from LocalStorage
+  // 🔥 SYNC USER (LOGIN / LOGOUT / REFRESH)
   useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) setUser(JSON.parse(stored));
+    function syncUser() {
+      const stored = localStorage.getItem("user");
+      setUser(stored ? JSON.parse(stored) : null);
+    }
+
+    syncUser();
+
+    window.addEventListener("user-login", syncUser);
+    window.addEventListener("user-logout", syncUser);
+
+    return () => {
+      window.removeEventListener("user-login", syncUser);
+      window.removeEventListener("user-logout", syncUser);
+    };
   }, []);
 
-  // Search fields
+  // SEARCH
   const [eventQuery, setEventQuery] = useState("");
   const [cityQuery, setCityQuery] = useState("");
 
-  // Autocomplete
+  // AUTOCOMPLETE
   const [cityResults, setCityResults] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch matching cities
   useEffect(() => {
     async function fetchCities() {
       if (cityQuery.length < 2) {
         setCityResults([]);
         return;
       }
+
       const res = await fetch(`/api/search-location?q=${cityQuery}`);
       const data = await res.json();
       setCityResults(data.results || []);
       setShowDropdown(true);
     }
+
     const delay = setTimeout(fetchCities, 300);
     return () => clearTimeout(delay);
   }, [cityQuery]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setShowDropdown(false);
       }
     }
+
     document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
-  // SEARCH HANDLER
   function handleSearch() {
     const params = new URLSearchParams();
     if (eventQuery.trim()) params.set("event", eventQuery.trim());
@@ -70,17 +84,17 @@ export default function NavigationBar() {
 
   return (
     <>
-      {/* NAVBAR */}
+      
       <header className="w-full bg-gray-100 px-6 py-4 flex items-center justify-between border-b border-gray-200">
 
-        {/* LEFT SIDE */}
+       
         <div className="flex items-center gap-6" ref={dropdownRef}>
           <Image src="/icons/Meetup.png" alt="logo" width={85} height={85} />
 
-          {/* SEARCH BAR */}
+         
           <div className="flex items-center bg-gray-200/60 rounded-full px-4 py-2 shadow-inner gap-3 w-[550px] relative">
 
-            {/* SEARCH INPUT */}
+          
             <input
               type="text"
               placeholder="Search for anything..."
@@ -89,10 +103,10 @@ export default function NavigationBar() {
               className="flex-1 bg-white/70 outline-none px-3 text-gray-900 placeholder-gray-500 rounded-md h-9"
             />
 
-            {/* DIVIDER */}
+           
             <div className="w-[1px] h-6 bg-gray-300"></div>
 
-            {/* LOCATION INPUT */}
+           
             <div className="relative w-48">
               <input
                 type="text"
@@ -103,7 +117,7 @@ export default function NavigationBar() {
                 className="w-full bg-white/70 outline-none px-3 text-gray-900 placeholder-gray-500 rounded-md h-9"
               />
 
-              {/* CLEAR BUTTON */}
+             
               {cityQuery && (
                 <button
                   onClick={() => {
@@ -116,7 +130,7 @@ export default function NavigationBar() {
                 </button>
               )}
 
-              {/* AUTOCOMPLETE DROPDOWN */}
+              
               {showDropdown && cityResults.length > 0 && (
                 <div className="absolute top-11 left-0 w-full bg-white shadow-lg rounded-xl z-20 border border-gray-200 p-2">
 
@@ -141,7 +155,7 @@ export default function NavigationBar() {
               )}
             </div>
 
-            {/* SEARCH BUTTON */}
+            
             <button
               onClick={handleSearch}
               className="bg-black text-white rounded-full p-3 hover:bg-gray-800"
@@ -151,10 +165,10 @@ export default function NavigationBar() {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
+      
         <div className="relative flex items-center gap-6 text-gray-700">
 
-          {/* NOT LOGGED IN */}
+          
           {!user && (
             <div className="flex items-center gap-4">
               <button
@@ -173,7 +187,7 @@ export default function NavigationBar() {
             </div>
           )}
 
-          {/* LOGGED IN */}
+        
           {user && (
             <>
               <button className="hover:text-blue-600">
@@ -188,7 +202,7 @@ export default function NavigationBar() {
                 <Image src="/icons/support.png" alt="support" width={24} height={24} />
               </button>
 
-              {/* PROFILE DROPDOWN */}
+             
               <div
                 className="flex items-center gap-2 cursor-pointer select-none"
                 onClick={() => setOpen(!open)}
@@ -209,16 +223,21 @@ export default function NavigationBar() {
                   <button className="w-full text-left px-4 py-2 hover:bg-gray-100">Nastavitve</button>
 
                   <button
-                    onClick={() => {
-                      localStorage.removeItem("user");
-                      setUser(null);
-                      setOpen(false);
-                      router.push("/");
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-                  >
-                    Odjava
-                  </button>
+  onClick={() => {
+    localStorage.removeItem("user");
+
+    // 🔥 obvesti cel app
+    window.dispatchEvent(new Event("user-logout"));
+
+    setUser(null);
+    setOpen(false);
+
+    router.push("/");
+  }}
+  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+>
+  Odjava
+</button>
                 </div>
               )}
             </>
@@ -226,7 +245,7 @@ export default function NavigationBar() {
         </div>
       </header>
 
-      {/* MODALS */}
+      
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {showRegister && <RegisterModal onClose={() => setShowRegister(false)} />}
     </>

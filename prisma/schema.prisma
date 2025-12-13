@@ -11,24 +11,69 @@ datasource db {
 // ────────────────────────────────────────────
 // USER
 // ────────────────────────────────────────────
-// A registered user that can create events and join events
+// Registered user that can create groups, events, and join them
 //
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
   name      String?
   password  String
 
   // Relations
-  events    Event[]        // events created by user
-  attending Attendee[]     // events user joined
+  ownedGroups Group[]        // groups this user owns
+  groupMember GroupMember[]  // groups this user joined
+
+  createdEvents Event[]      // events created by user
+  attending     Attendee[]   // events user joined
+}
+
+//
+// ────────────────────────────────────────────
+// GROUP
+// ────────────────────────────────────────────
+// Meetup-style group (e.g. "React Ljubljana")
+//
+model Group {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  city        String
+  country     String?
+
+  // Owner
+  ownerId Int
+  owner   User @relation(fields: [ownerId], references: [id])
+
+  // Relations
+  members GroupMember[]
+  events  Event[]
+
+  createdAt DateTime @default(now())
+}
+
+//
+// ────────────────────────────────────────────
+// GROUP MEMBER
+// ────────────────────────────────────────────
+// Join table: User ↔ Group
+//
+model GroupMember {
+  id      Int @id @default(autoincrement())
+
+  userId  Int
+  groupId Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId]) // user can join group only once
 }
 
 //
 // ────────────────────────────────────────────
 // EVENT
 // ────────────────────────────────────────────
-// Meetup-style event with location, description, category, capacity
+// Event that belongs to a group
 //
 model Event {
   id          Int       @id @default(autoincrement())
@@ -36,38 +81,42 @@ model Event {
   description String?
   date        DateTime
 
-  // Location fields
+  // Location
   city        String
   country     String
-  countryCode String?    // for flags: SI, AT, IT, US, ...
+  countryCode String?
 
-  // Optional data
+  // Optional
   imageUrl    String?
   category    String?
   capacity    Int?
 
   // Creator
-  userId      Int
-  user        User       @relation(fields: [userId], references: [id])
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 
-  // People attending this event
-  attendees   Attendee[]
+  // Group
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id])
+
+  // Attendees
+  attendees Attendee[]
 }
 
 //
 // ────────────────────────────────────────────
 // ATTENDEE
 // ────────────────────────────────────────────
-// A join table: User ↔ Event (many-to-many)
-// Prevents duplicate joins via @@unique
+// Join table: User ↔ Event
 //
 model Attendee {
-  id      Int    @id @default(autoincrement())
+  id      Int @id @default(autoincrement())
+
   userId  Int
   eventId Int
 
-  user   User  @relation(fields: [userId], references: [id])
-  event  Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
 
-  @@unique([userId, eventId]) // A user can join the same event only once
+  @@unique([userId, eventId]) // user can join event only once
 }
