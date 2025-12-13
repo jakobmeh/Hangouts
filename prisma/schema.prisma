@@ -11,27 +11,28 @@ datasource db {
 // ────────────────────────────────────────────
 // USER
 // ────────────────────────────────────────────
-// Registered user that can create groups, events, and join them
 //
 model User {
-  id        Int     @id @default(autoincrement())
-  email     String  @unique
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
   name      String?
   password  String
 
-  // Relations
-  ownedGroups Group[]        // groups this user owns
-  groupMember GroupMember[]  // groups this user joined
+  // Groups
+  ownedGroups Group[]
+  memberships GroupMember[]
 
-  createdEvents Event[]      // events created by user
-  attending     Attendee[]   // events user joined
+  // Events
+  createdEvents Event[]
+  attending     Attendee[]
+
+  createdAt DateTime @default(now())
 }
 
 //
 // ────────────────────────────────────────────
 // GROUP
 // ────────────────────────────────────────────
-// Meetup-style group (e.g. "React Ljubljana")
 //
 model Group {
   id          Int      @id @default(autoincrement())
@@ -53,9 +54,8 @@ model Group {
 
 //
 // ────────────────────────────────────────────
-// GROUP MEMBER
+// GROUP MEMBER (User ↔ Group)
 // ────────────────────────────────────────────
-// Join table: User ↔ Group
 //
 model GroupMember {
   id      Int @id @default(autoincrement())
@@ -66,14 +66,13 @@ model GroupMember {
   user  User  @relation(fields: [userId], references: [id])
   group Group @relation(fields: [groupId], references: [id])
 
-  @@unique([userId, groupId]) // user can join group only once
+  @@unique([userId, groupId])
 }
 
 //
 // ────────────────────────────────────────────
 // EVENT
 // ────────────────────────────────────────────
-// Event that belongs to a group
 //
 model Event {
   id          Int       @id @default(autoincrement())
@@ -95,19 +94,20 @@ model Event {
   userId Int
   user   User @relation(fields: [userId], references: [id])
 
-  // Group
-  groupId Int
-  group   Group @relation(fields: [groupId], references: [id])
+  // Group (optional!)
+  groupId Int?
+  group   Group? @relation(fields: [groupId], references: [id])
 
   // Attendees
   attendees Attendee[]
+
+  createdAt DateTime @default(now())
 }
 
 //
 // ────────────────────────────────────────────
-// ATTENDEE
+// ATTENDEE (User ↔ Event)
 // ────────────────────────────────────────────
-// Join table: User ↔ Event
 //
 model Attendee {
   id      Int @id @default(autoincrement())
@@ -118,5 +118,5 @@ model Attendee {
   user  User  @relation(fields: [userId], references: [id])
   event Event @relation(fields: [eventId], references: [id])
 
-  @@unique([userId, eventId]) // user can join event only once
+  @@unique([userId, eventId])
 }

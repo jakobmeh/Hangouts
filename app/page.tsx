@@ -23,13 +23,52 @@ export type EventType = {
   user: { id: number; email: string; name?: string | null } | null;
 };
 
+type GroupType = {
+  id: number;
+  name: string;
+  description?: string | null;
+  city: string;
+  country?: string | null;
+  _count: {
+    members: number;
+  };
+};
+
+
 export default function HomePage() {
   const [events, setEvents] = useState<EventType[]>([]);
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
+const [groups, setGroups] = useState<GroupType[]>([]);
 
-  // 🔥 SYNC USER STATE (LOGIN / LOGOUT / REFRESH)
+  useEffect(() => {
+  async function loadData() {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    try {
+      const [eventsRes, groupsRes] = await Promise.all([
+        fetch("/api/events"),
+        fetch("/api/groups"),
+      ]);
+
+      const eventsData = await eventsRes.json();
+      const groupsData = await groupsRes.json();
+
+      setEvents(eventsData.events || []);
+      setGroups(groupsData.groups || []);
+    } catch (err) {
+      console.error("Napaka pri nalaganju:", err);
+    }
+
+    setLoading(false);
+  }
+
+  loadData();
+}, []);
+
+
   useEffect(() => {
     function syncUser() {
       const stored = localStorage.getItem("user");
@@ -91,6 +130,48 @@ export default function HomePage() {
           Join Meetup
         </button>
       </section>
+{/* POPULAR GROUPS */}
+<section className="px-10 pb-24">
+  <div className="flex items-center justify-between mb-6">
+    <h2 className="text-3xl font-bold">
+      Popular groups <span className="text-purple-600">near you</span>
+    </h2>
+
+    <span className="text-sm text-purple-600 cursor-pointer hover:underline">
+      See all groups
+    </span>
+  </div>
+
+  <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+    {groups.map((group) => (
+      <div
+        key={group.id}
+        className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition"
+      >
+        {/* IMAGE PLACEHOLDER */}
+        <div className="h-32 bg-gray-200 rounded-lg mb-4" />
+
+        <h3 className="font-semibold text-lg mb-1">
+          {group.name}
+        </h3>
+
+        <p className="text-sm text-gray-600">
+          {group.city}{group.country ? `, ${group.country}` : ""}
+        </p>
+
+        <p className="text-xs text-gray-500 mt-1">
+          👥 {group._count.members} members
+        </p>
+
+        <button
+          className="mt-4 w-full border border-black text-black py-2 rounded-full hover:bg-black hover:text-white transition"
+        >
+          View group
+        </button>
+      </div>
+    ))}
+  </div>
+</section>
 
       {/* EVENTS PREVIEW – GLOBAL */}
       <section className="px-10 pb-20">
