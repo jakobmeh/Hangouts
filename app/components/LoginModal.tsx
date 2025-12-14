@@ -18,27 +18,33 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
     const password = formData.get("password");
 
     try {
+      // 1️⃣ LOGIN (nastavi cookie)
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
+        const data = await res.json();
         setMessage(data.message || "Napaka pri prijavi.");
-      } else {
-        // ✅ SAVE USER
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        // ✅ NOTIFY APP (THIS IS THE FIX)
-        window.dispatchEvent(new Event("user-login"));
-
-        // close modal + redirect
-        onClose();
-        router.push("/");
+        setLoading(false);
+        return;
       }
+
+      // 2️⃣ FETCH CELOTNEGA USERJA (z image!)
+      const meRes = await fetch("/api/me");
+      const user = await meRes.json();
+
+      // 3️⃣ SHRANI USERJA
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // 4️⃣ OBVESTI NAVBAR / SIDEBAR
+      window.dispatchEvent(new Event("user-login"));
+
+      // 5️⃣ ZAPRI MODAL + REDIRECT
+      onClose();
+      router.push("/");
     } catch (error) {
       setMessage("Napaka pri povezavi s strežnikom.");
     } finally {
