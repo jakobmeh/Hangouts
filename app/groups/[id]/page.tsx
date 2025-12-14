@@ -2,7 +2,7 @@ import Link from "next/link";
 import NavigationBar from "@/app/components/NavigationBar";
 import Footer from "@/app/components/Footer";
 import Sidebar from "@/app/components/sidebar";
-
+import EventJoinButton from "./EventJoinButton";
 import JoinLeaveButton from "./JoinLeaveButton";
 import DeleteGroupButton from "./DeleteGroupButton";
 import CreateEventButton from "./CreateEventButton";
@@ -28,6 +28,9 @@ export default async function GroupPage({
 
   const user = await getCurrentUser();
   const isOwner = user && user.id === group.owner.id;
+
+  const isMember =
+  user && group.members.some((m: any) => m.user.id === user.id);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -108,6 +111,61 @@ export default async function GroupPage({
                   ))}
                 </ul>
               </div>
+
+    <div className="my-10 border-t" />
+
+{/* EVENTS */}
+<div>
+  <h2 className="text-xl font-semibold mb-5 text-gray-900">
+    Events ({group._count.events})
+  </h2>
+
+  {group.events.length === 0 ? (
+    <p className="text-gray-500">No events yet.</p>
+  ) : (
+    <ul className="space-y-4">
+      {group.events.map((event: any) => {
+        const joined =
+          user &&
+          event.attendees.some(
+            (a: any) => a.userId === user.id
+          );
+
+        return (
+          <li
+            key={event.id}
+            className="p-6 bg-gray-50 border rounded-2xl hover:bg-gray-100 transition"
+          >
+            <div className="flex justify-between items-start gap-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {event.title}
+                </h3>
+
+                <p className="text-sm text-gray-600 mt-1">
+                  📅 {new Date(event.date).toLocaleString()}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  📍 {event.city}
+                </p>
+              </div>
+
+              {/* JOIN / LEAVE EVENT */}
+              {isMember && user && (
+                <EventJoinButton
+                  eventId={event.id}
+                  initialJoined={!!joined}
+                />
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</div>
+
             </section>
           </div>
         </main>

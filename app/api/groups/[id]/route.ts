@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/auth";
 
+/* ─────────────────────────────── */
+/* GET GROUP */
+/* ─────────────────────────────── */
 export async function GET(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -16,12 +19,27 @@ export async function GET(
   const group = await prisma.group.findUnique({
     where: { id: groupId },
     include: {
-      owner: { select: { id: true, name: true } },
+      owner: {
+        select: { id: true, name: true },
+      },
       members: {
         include: {
-          user: { select: { id: true, name: true } },
+          user: {
+            select: { id: true, name: true },
+          },
         },
       },
+
+      // ✅ KLJUČNI POPRAVEK
+      events: {
+        orderBy: { date: "asc" },
+        include: {
+          attendees: {
+            select: { userId: true },
+          },
+        },
+      },
+
       _count: {
         select: { members: true, events: true },
       },
@@ -35,8 +53,11 @@ export async function GET(
   return NextResponse.json(group);
 }
 
+/* ─────────────────────────────── */
+/* DELETE GROUP */
+/* ─────────────────────────────── */
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -63,17 +84,17 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // 🔥 1. delete members
+  // 🔥 delete members
   await prisma.groupMember.deleteMany({
     where: { groupId },
   });
 
-  // 🔥 2. delete events
+  // 🔥 delete events (attendees se pobrišejo zaradi cascade)
   await prisma.event.deleteMany({
     where: { groupId },
   });
 
-  // 🔥 3. delete group
+  // 🔥 delete group
   await prisma.group.delete({
     where: { id: groupId },
   });
