@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type User = {
   name?: string | null;
   email?: string | null;
+  image?: string | null;
 };
 
 type GroupWithEvents = {
@@ -43,10 +45,26 @@ export default function Sidebar({ user }: Props) {
     <aside className="w-64 flex-shrink-0 flex flex-col gap-4">
       {/* USER CARD */}
       <div className="bg-white p-4 rounded-xl border flex flex-col items-center">
-        <div className="w-20 h-20 bg-gray-300 rounded-full mb-2" />
-        <h2 className="font-semibold">
+        {/* PROFILE IMAGE */}
+        <div className="relative w-20 h-20 mb-2">
+          {user?.image ? (
+            <Image
+              src={user.image}
+              alt="Profile picture"
+              fill
+              className="rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-2xl font-semibold">
+              {user?.name?.[0]?.toUpperCase() || "U"}
+            </div>
+          )}
+        </div>
+
+        <h2 className="font-semibold text-gray-900">
           {user?.name || "Neznan uporabnik"}
         </h2>
+
         <p className="text-sm text-gray-500">{user?.email}</p>
       </div>
 
@@ -67,7 +85,7 @@ export default function Sidebar({ user }: Props) {
                 {/* GROUP */}
                 <div
                   onClick={() => router.push(`/groups/${g.id}`)}
-                  className="font-medium cursor-pointer hover:text-purple-600"
+                  className="font-medium cursor-pointer hover:text-blue-600 transition"
                 >
                   {g.name}
                 </div>
@@ -79,7 +97,7 @@ export default function Sidebar({ user }: Props) {
                       <li
                         key={e.id}
                         onClick={() => router.push(`/events/${e.id}`)}
-                        className="cursor-pointer hover:text-purple-600"
+                        className="cursor-pointer hover:text-blue-600 transition"
                       >
                         • {e.title}
                       </li>

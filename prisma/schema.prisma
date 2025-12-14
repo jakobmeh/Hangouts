@@ -13,10 +13,14 @@ datasource db {
 // ────────────────────────────────────────────
 //
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
   name      String?
+  image     String?   // 👈 PROFILKA (URL)
   password  String
+  
+
+
 
   // Groups
   ownedGroups Group[]

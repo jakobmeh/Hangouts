@@ -11,13 +11,14 @@ import RegisterModal from "../components/RegisterModal";
 export default function NavigationBar() {
   const router = useRouter();
 
-  const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [open, setOpen] = useState(false);
 
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
-  // 🔥 SYNC USER (LOGIN / LOGOUT / REFRESH)
+  /* ================= USER SYNC ================= */
+
   useEffect(() => {
     function syncUser() {
       const stored = localStorage.getItem("user");
@@ -25,7 +26,6 @@ export default function NavigationBar() {
     }
 
     syncUser();
-
     window.addEventListener("user-login", syncUser);
     window.addEventListener("user-logout", syncUser);
 
@@ -35,11 +35,11 @@ export default function NavigationBar() {
     };
   }, []);
 
-  // SEARCH
+  /* ================= SEARCH ================= */
+
   const [eventQuery, setEventQuery] = useState("");
   const [cityQuery, setCityQuery] = useState("");
 
-  // AUTOCOMPLETE
   const [cityResults, setCityResults] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -68,6 +68,7 @@ export default function NavigationBar() {
         !dropdownRef.current.contains(e.target as Node)
       ) {
         setShowDropdown(false);
+        setOpen(false);
       }
     }
 
@@ -82,171 +83,174 @@ export default function NavigationBar() {
     router.push(`/search?${params.toString()}`);
   }
 
+  async function handleLogout() {
+    await fetch("/api/logout", { method: "POST" });
+    localStorage.removeItem("user");
+    window.dispatchEvent(new Event("user-logout"));
+    setUser(null);
+    setOpen(false);
+    router.push("/");
+  }
+
+  /* ================= UI ================= */
+
   return (
     <>
-      
-      <header className="w-full bg-gray-100 px-6 py-4 flex items-center justify-between border-b border-gray-200">
+      <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-       
-        <div className="flex items-center gap-6" ref={dropdownRef}>
-          <Image src="/icons/Meetup.png" alt="logo" width={85} height={85} />
-
-         
-          <div className="flex items-center bg-gray-200/60 rounded-full px-4 py-2 shadow-inner gap-3 w-[550px] relative">
-
-          
-            <input
-              type="text"
-              placeholder="Search for anything..."
-              value={eventQuery}
-              onChange={(e) => setEventQuery(e.target.value)}
-              className="flex-1 bg-white/70 outline-none px-3 text-gray-900 placeholder-gray-500 rounded-md h-9"
+          {/* LEFT */}
+          <div className="flex items-center gap-6" ref={dropdownRef}>
+            <Image
+              src="/icons/Meetup.png"
+              alt="Meetup"
+              width={90}
+              height={32}
+              className="cursor-pointer"
+              onClick={() => router.push("/")}
             />
 
-           
-            <div className="w-[1px] h-6 bg-gray-300"></div>
-
-           
-            <div className="relative w-48">
+            {/* SEARCH */}
+            <div className="hidden md:flex items-center bg-gray-100 rounded-full px-3 py-1.5 gap-3 w-[520px] relative">
               <input
                 type="text"
-                placeholder="Location"
-                value={cityQuery}
-                onChange={(e) => setCityQuery(e.target.value)}
-                onFocus={() => cityQuery.length >= 2 && setShowDropdown(true)}
-                className="w-full bg-white/70 outline-none px-3 text-gray-900 placeholder-gray-500 rounded-md h-9"
+                placeholder="Search for events or groups"
+                value={eventQuery}
+                onChange={(e) => setEventQuery(e.target.value)}
+                className="flex-1 bg-transparent outline-none px-2 text-sm text-gray-900 placeholder-gray-500"
               />
 
-             
-              {cityQuery && (
-                <button
-                  onClick={() => {
-                    setCityQuery("");
-                    setShowDropdown(false);
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
-                >
-                  ✕
-                </button>
-              )}
+              <div className="w-px h-5 bg-gray-300" />
 
-              
-              {showDropdown && cityResults.length > 0 && (
-                <div className="absolute top-11 left-0 w-full bg-white shadow-lg rounded-xl z-20 border border-gray-200 p-2">
-
-                  <p className="text-xs text-gray-700 px-2 mb-2 font-semibold">
-                    CITY
-                  </p>
-
-                  {cityResults.map((loc, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setCityQuery(`${loc.city}, ${loc.country}`);
-                        setShowDropdown(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-2 py-2 hover:bg-gray-100 rounded"
-                    >
-                      <MdLocationOn className="text-gray-900 text-lg" />
-                      <span className="text-gray-900">{loc.city}, {loc.country}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            
-            <button
-              onClick={handleSearch}
-              className="bg-black text-white rounded-full p-3 hover:bg-gray-800"
-            >
-              <Image src="/icons/search-interface-symbol.png" alt="Search" width={18} height={18} />
-            </button>
-          </div>
-        </div>
-
-      
-        <div className="relative flex items-center gap-6 text-gray-700">
-
-          
-          {!user && (
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowLogin(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-              >
-                Prijava
-              </button>
-
-              <button
-                onClick={() => setShowRegister(true)}
-                className="px-4 py-2 bg-gray-800 text-white rounded-full hover:bg-black"
-              >
-                Registracija
-              </button>
-            </div>
-          )}
-
-        
-          {user && (
-            <>
-              <button className="hover:text-blue-600">
-                <Image src="/icons/comment.png" alt="comment" width={24} height={24} />
-              </button>
-
-              <button className="hover:opacity-60 transition">
-                <Image src="/icons/notification.png" alt="notification" width={24} height={24} />
-              </button>
-
-              <button className="hover:text-blue-600">
-                <Image src="/icons/support.png" alt="support" width={24} height={24} />
-              </button>
-
-             
-              <div
-                className="flex items-center gap-2 cursor-pointer select-none"
-                onClick={() => setOpen(!open)}
-              >
-                <div className="w-9 h-9 bg-gray-300 rounded-full"></div>
-                <Image
-                  src="/icons/arrow-down-sign-to-navigate.png"
-                  alt="Dropdown"
-                  width={10}
-                  height={10}
-                  className={`transition-transform ${open ? "rotate-180" : "rotate-0"}`}
+              <div className="relative w-44">
+                <input
+                  type="text"
+                  placeholder="Location"
+                  value={cityQuery}
+                  onChange={(e) => setCityQuery(e.target.value)}
+                  onFocus={() => cityQuery.length >= 2 && setShowDropdown(true)}
+                  className="w-full bg-transparent outline-none px-2 text-sm text-gray-900 placeholder-gray-500"
                 />
+
+                {showDropdown && cityResults.length > 0 && (
+                  <div className="absolute top-full mt-2 left-0 w-full bg-white border border-gray-300 rounded-2xl shadow-2xl z-[60] overflow-hidden">
+                    <div className="max-h-64 overflow-y-auto">
+                      {cityResults.map((loc, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setCityQuery(`${loc.city}, ${loc.country}`);
+                            setShowDropdown(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-900 hover:bg-blue-50 transition"
+                        >
+                          <MdLocationOn className="text-blue-600 text-lg" />
+                          <span className="font-medium">
+                            {loc.city}
+                            <span className="text-gray-500 font-normal">
+                              , {loc.country}
+                            </span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {open && (
-                <div className="absolute right-0 top-14 bg-white border border-gray-200 rounded-lg w-40 py-2 z-20">
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-100">Profil</button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-100">Nastavitve</button>
+              <button
+                onClick={handleSearch}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-2 text-sm font-medium"
+              >
+                Search
+              </button>
+            </div>
+          </div>
 
-                  <button
- onClick={async () => {
-  await fetch("/api/logout", { method: "POST" });
+          {/* RIGHT */}
+          <div className="relative flex items-center gap-4">
+            {!user && (
+              <>
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600"
+                >
+                  Log in
+                </button>
+                <button
+                  onClick={() => setShowRegister(true)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700"
+                >
+                  Sign up
+                </button>
+              </>
+            )}
 
-  localStorage.removeItem("user");
+            {user && (
+              <>
+                <div
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => setOpen(!open)}
+                >
+                  {/* PROFILE IMAGE */}
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                    {user.image ? (
+                      <Image
+                        src={user.image}
+                        alt="Profile"
+                        fill
+                        className="object-cover"
+                        sizes="32px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-700">
+                        {user.name?.[0]?.toUpperCase() || "U"}
+                      </div>
+                    )}
+                  </div>
 
-  window.dispatchEvent(new Event("user-logout"));
-
-  setUser(null);
-  setOpen(false);
-
-  router.push("/");
-}}
-  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
->
-  Odjava
-</button>
+                  <Image
+                    src="/icons/arrow-down-sign-to-navigate.png"
+                    alt=""
+                    width={10}
+                    height={10}
+                    className={`transition-transform ${open ? "rotate-180" : ""}`}
+                  />
                 </div>
-              )}
-            </>
-          )}
+
+                {/* DROPDOWN */}
+                {open && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-2xl shadow-2xl z-[60] py-2">
+                    <button
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        setOpen(false);
+                        router.push("/profile");
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100"
+                    >
+                      Profile
+                    </button>
+
+                    <div className="my-1 border-t" />
+
+                    <button
+                      onMouseDown={async (e) => {
+                        e.stopPropagation();
+                        await handleLogout();
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </header>
 
-      
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {showRegister && <RegisterModal onClose={() => setShowRegister(false)} />}
     </>

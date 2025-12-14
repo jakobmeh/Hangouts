@@ -33,6 +33,7 @@ type GroupType = {
 export default function HomePage() {
   const [user, setUser] = useState<UserType | null>(null);
   const [groups, setGroups] = useState<GroupType[]>([]);
+  const [myGroupIds, setMyGroupIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
 
@@ -60,20 +61,38 @@ export default function HomePage() {
     };
   }, []);
 
-  /* ================= LOAD GROUPS ================= */
+  /* ================= LOAD ALL GROUPS ================= */
 
   useEffect(() => {
     async function loadGroups() {
       const res = await fetch("/api/groups");
       if (res.ok) {
         const data = await res.json();
-        setGroups(data.slice(0, 3)); // 🔥 pokažemo samo 3
+        setGroups(data.slice(0, 6)); // pokažemo max 6
       }
-      setLoading(false);
     }
 
     loadGroups();
   }, []);
+
+  /* ================= LOAD MY GROUPS ================= */
+
+  useEffect(() => {
+    async function loadMyGroups() {
+      const res = await fetch("/api/me/groups");
+      if (res.ok) {
+        const data = await res.json();
+        setMyGroupIds(data.map((g: any) => g.id));
+      }
+      setLoading(false);
+    }
+
+    if (user) {
+      loadMyGroups();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   /* ================= LOADING ================= */
 
@@ -121,38 +140,49 @@ export default function HomePage() {
       <NavigationBar />
 
       <div className="flex flex-1 p-6 gap-6">
-       <Sidebar user={user} />
+        {/* SIDEBAR */}
+        <Sidebar user={user} />
 
-
+        {/* MAIN */}
         <main className="flex-1 bg-white p-6 rounded-xl border">
           <h1 className="text-2xl font-bold mb-6">
             Discover groups
           </h1>
 
-          <div className="grid gap-4">
-            {groups.map((group) => (
-              <Link
-                key={group.id}
-                href={`/groups/${group.id}`}
-                className="border rounded-xl p-4 hover:shadow transition"
-              >
-                <h2 className="font-semibold">{group.name}</h2>
-                <p className="text-sm text-gray-600">
-                  {group.city}
-                  {group.country ? `, ${group.country}` : ""}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  {group._count.members} members ·{" "}
-                  {group._count.events} events
-                </p>
-              </Link>
-            ))}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {groups
+              .filter((group) => !myGroupIds.includes(group.id))
+              .map((group) => (
+                <Link
+                  key={group.id}
+                  href={`/groups/${group.id}`}
+                  className="border rounded-xl p-4 hover:shadow transition bg-gray-50"
+                >
+                  <h2 className="font-semibold">{group.name}</h2>
+
+                  <p className="text-sm text-gray-600">
+                    📍 {group.city}
+                    {group.country ? `, ${group.country}` : ""}
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-2">
+                    {group._count.members} members ·{" "}
+                    {group._count.events} events
+                  </p>
+                </Link>
+              ))}
           </div>
+
+          {groups.filter((g) => !myGroupIds.includes(g.id)).length === 0 && (
+            <p className="text-gray-500 mt-10 text-center">
+              🎉 You already joined all available groups
+            </p>
+          )}
 
           <div className="mt-6 text-center">
             <Link
               href="/groups"
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg"
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
             >
               View all groups
             </Link>
