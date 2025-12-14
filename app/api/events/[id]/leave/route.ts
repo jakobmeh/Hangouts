@@ -3,10 +3,10 @@ import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/auth";
 
 export async function POST(
-  _: Request,
-  context: { params: Promise<{ id: string }> }
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params;
+  const { id } = await params;
   const eventId = Number(id);
 
   const user = await getCurrentUser();
@@ -14,12 +14,25 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await prisma.attendee.delete({
+  const attendee = await prisma.attendee.findUnique({
     where: {
       userId_eventId: {
         userId: user.id,
         eventId,
       },
+    },
+  });
+
+  if (!attendee) {
+    return NextResponse.json(
+      { error: "Not attending" },
+      { status: 404 }
+    );
+  }
+
+  await prisma.attendee.delete({
+    where: {
+      id: attendee.id,
     },
   });
 
