@@ -12,20 +12,21 @@ export default function NewEventPage() {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [city, setCity] = useState("");
-
+const [capacity, setCapacity] = useState<number | "">("");
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     const res = await fetch(`/api/groups/${groupId}/events`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        description,
-        date,
-        city,
-        country: "Slovenia",
-      }),
+     body: JSON.stringify({
+  title,
+  description,
+  date,
+  city,
+  country: "Slovenia",
+  capacity: capacity === "" ? null : capacity, // ✅ TO JE KLJUČNO
+}),
     });
 
     if (res.ok) {
@@ -73,6 +74,17 @@ export default function NewEventPage() {
           onChange={(e) => setCity(e.target.value)}
           required
         />
+
+        <input
+  type="number"
+  min={1}
+  className="w-full border rounded-lg p-3 mb-4"
+  placeholder="Capacity (optional)"
+  value={capacity}
+  onChange={(e) =>
+    setCapacity(e.target.value ? Number(e.target.value) : "")
+  }
+/>
 
         <button
           type="submit"

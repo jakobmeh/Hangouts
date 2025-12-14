@@ -22,8 +22,10 @@ export async function POST(
       date: new Date(body.date),
       city: body.city,
       country: body.country,
+      capacity: body.capacity,
       userId: user.id,
       groupId: Number(id), // ✅ zdaj NI več NaN
+      
     },
   });
 

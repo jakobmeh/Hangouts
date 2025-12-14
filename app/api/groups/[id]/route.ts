@@ -30,15 +30,31 @@ export async function GET(
         },
       },
 
-      // ✅ KLJUČNI POPRAVEK
-      events: {
-        orderBy: { date: "asc" },
-        include: {
-          attendees: {
-            select: { userId: true },
+      // ✅ PRAVILNO: attendees + user
+  events: {
+  orderBy: { date: "asc" },
+  select: {
+    id: true,
+    title: true,
+    date: true,
+    city: true,
+    capacity: true, // ✅ TO JE KLJUČNO
+    attendees: {
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
           },
         },
       },
+    },
+    _count: {
+      select: { attendees: true },
+    },
+  },
+},
 
       _count: {
         select: { members: true, events: true },
@@ -84,17 +100,14 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // 🔥 delete members
   await prisma.groupMember.deleteMany({
     where: { groupId },
   });
 
-  // 🔥 delete events (attendees se pobrišejo zaradi cascade)
   await prisma.event.deleteMany({
     where: { groupId },
   });
 
-  // 🔥 delete group
   await prisma.group.delete({
     where: { id: groupId },
   });
