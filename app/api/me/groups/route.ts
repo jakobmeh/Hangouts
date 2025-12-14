@@ -10,22 +10,23 @@ export async function GET() {
 
   const groups = await prisma.group.findMany({
     where: {
-      OR: [
-        { ownerId: user.id },
-        {
-          members: {
-            some: {
-              userId: user.id,
-            },
-          },
+      members: {
+        some: {
+          userId: user.id,
         },
-      ],
+      },
     },
     select: {
       id: true,
       name: true,
+      events: {
+        orderBy: { date: "asc" },
+        select: {
+          id: true,
+          title: true,
+        },
+      },
     },
-    orderBy: { createdAt: "desc" },
   });
 
   return NextResponse.json(groups);

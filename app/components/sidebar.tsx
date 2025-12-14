@@ -8,43 +8,35 @@ type User = {
   email?: string | null;
 };
 
-type Event = {
-  id: number;
-  title: string;
-};
-
-type Group = {
+type GroupWithEvents = {
   id: number;
   name: string;
+  events: {
+    id: number;
+    title: string;
+  }[];
 };
 
 type Props = {
   user: User | null;
-  events: Event[];
 };
 
-export default function Sidebar({
-  user,
-  events = [], // ✅ KLJUČNI FIX
-}: Props) {
+export default function Sidebar({ user }: Props) {
   const router = useRouter();
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loadingGroups, setLoadingGroups] = useState(true);
+  const [groups, setGroups] = useState<GroupWithEvents[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadMyGroups() {
+    async function load() {
       const res = await fetch("/api/me/groups");
       if (res.ok) {
         setGroups(await res.json());
       }
-      setLoadingGroups(false);
+      setLoading(false);
     }
 
-    if (user) {
-      loadMyGroups();
-    } else {
-      setLoadingGroups(false);
-    }
+    if (user) load();
+    else setLoading(false);
   }, [user]);
 
   return (
@@ -52,57 +44,52 @@ export default function Sidebar({
       {/* USER CARD */}
       <div className="bg-white p-4 rounded-xl border flex flex-col items-center">
         <div className="w-20 h-20 bg-gray-300 rounded-full mb-2" />
-        <h2 className="font-semibold text-gray-800 text-center">
+        <h2 className="font-semibold">
           {user?.name || "Neznan uporabnik"}
         </h2>
-        <p className="text-gray-500 text-sm text-center">{user?.email}</p>
+        <p className="text-sm text-gray-500">{user?.email}</p>
       </div>
 
-      {/* YOUR EVENTS */}
+      {/* GROUPS + EVENTS */}
       <div className="bg-white p-4 rounded-xl border">
-        <h3 className="text-gray-700 font-semibold mb-2">Your Events</h3>
-
-        <ul className="text-gray-600 text-sm space-y-1 max-h-40 overflow-y-auto">
-          {events.length === 0 ? (
-            <li className="text-gray-400 italic">No upcoming events</li>
-          ) : (
-            events.map((e) => (
-              <li
-                key={e.id}
-                onClick={() => router.push(`/events/${e.id}`)}
-                className="cursor-pointer hover:text-purple-600"
-              >
-                {e.title}
-              </li>
-            ))
-          )}
-        </ul>
-      </div>
-
-      {/* YOUR GROUPS */}
-      <div className="bg-white p-4 rounded-xl border">
-        <h3 className="text-gray-700 font-semibold mb-2">
-          Your Groups{" "}
-          {!loadingGroups && groups.length > 0 && `(${groups.length})`}
+        <h3 className="font-semibold mb-2">
+          Your Groups {!loading && groups.length > 0 && `(${groups.length})`}
         </h3>
 
-        <ul className="space-y-1 text-sm">
-          {loadingGroups ? (
-            <li className="text-gray-400 italic">Loading...</li>
-          ) : groups.length === 0 ? (
-            <li className="text-gray-400 italic">No groups</li>
-          ) : (
-            groups.map((g) => (
-              <li
-                key={g.id}
-                onClick={() => router.push(`/groups/${g.id}`)}
-                className="cursor-pointer hover:text-purple-600"
-              >
-                {g.name}
+        {loading ? (
+          <p className="text-sm text-gray-400">Loading…</p>
+        ) : groups.length === 0 ? (
+          <p className="text-sm text-gray-400">No groups</p>
+        ) : (
+          <ul className="space-y-3 text-sm">
+            {groups.map((g) => (
+              <li key={g.id}>
+                {/* GROUP */}
+                <div
+                  onClick={() => router.push(`/groups/${g.id}`)}
+                  className="font-medium cursor-pointer hover:text-purple-600"
+                >
+                  {g.name}
+                </div>
+
+                {/* EVENTS */}
+                {g.events.length > 0 && (
+                  <ul className="ml-3 mt-1 space-y-1 text-gray-600">
+                    {g.events.map((e) => (
+                      <li
+                        key={e.id}
+                        onClick={() => router.push(`/events/${e.id}`)}
+                        className="cursor-pointer hover:text-purple-600"
+                      >
+                        • {e.title}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
-            ))
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
       </div>
     </aside>
   );

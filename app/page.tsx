@@ -121,7 +121,8 @@ export default function HomePage() {
       <NavigationBar />
 
       <div className="flex flex-1 p-6 gap-6">
-       <Sidebar user={user} events={[]} />
+       <Sidebar user={user} />
+
 
         <main className="flex-1 bg-white p-6 rounded-xl border">
           <h1 className="text-2xl font-bold mb-6">

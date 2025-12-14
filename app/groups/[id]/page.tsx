@@ -1,7 +1,7 @@
 import JoinLeaveButton from "./JoinLeaveButton";
 import DeleteGroupButton from "./DeleteGroupButton";
 import { getCurrentUser } from "@/app/lib/auth";
-
+import CreateEventButton from "./CreateEventButton";
 async function getGroup(id: string) {
   const res = await fetch(`http://localhost:3000/api/groups/${id}`, {
     cache: "no-store",
@@ -37,6 +37,12 @@ export default async function GroupPage({
         )}
       </div>
 
+
+{isOwner && (
+  <div className="mt-4">
+    <CreateEventButton groupId={group.id} />
+  </div>
+)}
       <h2 className="mt-6 font-semibold">Members</h2>
       <ul className="list-disc ml-5">
         {group.members.map((m: any) => (
