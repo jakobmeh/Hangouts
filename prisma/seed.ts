@@ -3,91 +3,214 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding database...");
+   console.log("🧹 Cleaning database...");
 
-  // --- USERS ---
-  await prisma.user.createMany({
+  await prisma.attendee.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.groupMember.deleteMany();
+  await prisma.group.deleteMany();
+  await prisma.user.deleteMany();
+  // --------------------
+  // USERS
+  // --------------------
+  const ana = await prisma.user.create({
+    data: {
+      email: "ana@gmail.com",
+      name: "Ana",
+      password: "123",
+    },
+  });
+
+  const marko = await prisma.user.create({
+    data: {
+      email: "marko@gmail.com",
+      name: "Marko",
+      password: "123",
+    },
+  });
+
+  const jakob = await prisma.user.create({
+    data: {
+      email: "jakob@gmail.com",
+      name: "Jakob",
+      password: "123",
+    },
+  });
+
+  const eva = await prisma.user.create({
+    data: {
+      email: "eva@gmail.com",
+      name: "Eva",
+      password: "123",
+    },
+  });
+
+  // --------------------
+  // GROUPS
+  // --------------------
+  const reactLj = await prisma.group.create({
+    data: {
+      name: "React Ljubljana",
+      city: "Ljubljana",
+      country: "Slovenia",
+      ownerId: ana.id,
+    },
+  });
+
+  const nodeMb = await prisma.group.create({
+    data: {
+      name: "Node.js Maribor",
+      city: "Maribor",
+      country: "Slovenia",
+      ownerId: jakob.id,
+    },
+  });
+
+  const uxGroup = await prisma.group.create({
+    data: {
+      name: "UX Designers",
+      city: "Ljubljana",
+      country: "Slovenia",
+      ownerId: ana.id,
+    },
+  });
+
+  const hiking = await prisma.group.create({
+    data: {
+      name: "Hiking Slovenia",
+      city: "Bled",
+      country: "Slovenia",
+      ownerId: eva.id,
+    },
+  });
+
+  // --------------------
+  // GROUP MEMBERS
+  // --------------------
+  await prisma.groupMember.createMany({
     data: [
-      { email: "ana@gmail.com", name: "Ana", password: "123" },
-      { email: "marko@gmail.com", name: "Marko", password: "123" },
+      { userId: ana.id, groupId: reactLj.id },
+      { userId: ana.id, groupId: uxGroup.id },
+      { userId: ana.id, groupId: nodeMb.id },
+
+      { userId: marko.id, groupId: reactLj.id },
+      { userId: marko.id, groupId: hiking.id },
+
+      { userId: jakob.id, groupId: reactLj.id },
     ],
   });
 
-  // --- EVENTS ---
-  await prisma.event.createMany({
+  // --------------------
+  // DATES HELPERS
+  // --------------------
+  const daysFromNow = (d: number) =>
+    new Date(Date.now() + d * 24 * 60 * 60 * 1000);
+
+  // --------------------
+  // EVENTS
+  // --------------------
+  const events = await prisma.event.createMany({
     data: [
+      // FUTURE EVENTS
       {
-        title: "Tech Meetup Ljubljana",
-        description: "A meetup focused on developers and new technologies.",
-        date: new Date("2025-02-15T18:00:00"),
-        
+        title: "React Meetup #1",
+        date: daysFromNow(5),
         city: "Ljubljana",
         country: "Slovenia",
-        countryCode: "SI",
-
-        imageUrl: null,
-        category: "Technology",
-        capacity: 100,
-
-        userId: 1,
+        userId: ana.id,
+        groupId: reactLj.id,
       },
       {
-        title: "Football Fans Gathering Celje",
-        description: "Live match viewing with local football enthusiasts.",
-        date: new Date("2025-03-10T16:00:00"),
-
-        city: "Celje",
+        title: "Advanced React Patterns",
+        date: daysFromNow(12),
+        city: "Ljubljana",
         country: "Slovenia",
-        countryCode: "SI",
-
-        imageUrl: null,
-        category: "Sports",
-        capacity: 200,
-
-        userId: 1,
+        userId: ana.id,
+        groupId: reactLj.id,
       },
       {
-        title: "Startup Meetup Maribor",
-        description: "Entrepreneurs meet, pitch & brainstorm ideas.",
-        date: new Date("2025-04-05T17:00:00"),
-
+        title: "Node.js Backend Night",
+        date: daysFromNow(7),
         city: "Maribor",
         country: "Slovenia",
-        countryCode: "SI",
-
-        imageUrl: null,
-        category: "Business",
-        capacity: 150,
-
-        userId: 2,
+        userId: jakob.id,
+        groupId: nodeMb.id,
       },
       {
-        title: "Photography Walk Kranj",
-        description: "Learn photography outdoors with pro photographers.",
-        date: new Date("2025-05-01T10:00:00"),
-
-        city: "Kranj",
+        title: "UX Research Workshop",
+        date: daysFromNow(15),
+        city: "Ljubljana",
         country: "Slovenia",
-        countryCode: "SI",
+        userId: ana.id,
+        groupId: uxGroup.id,
+      },
+      {
+        title: "Sunday Hiking Trip",
+        date: daysFromNow(10),
+        city: "Bled",
+        country: "Slovenia",
+        userId: eva.id,
+        groupId: hiking.id,
+      },
 
-        imageUrl: null,
-        category: "Art",
-        capacity: 50,
-
-        userId: 2,
+      // PAST EVENTS
+      {
+        title: "Old React Meetup",
+        date: daysFromNow(-10),
+        city: "Ljubljana",
+        country: "Slovenia",
+        userId: ana.id,
+        groupId: reactLj.id,
+      },
+      {
+        title: "Past Node Meetup",
+        date: daysFromNow(-20),
+        city: "Maribor",
+        country: "Slovenia",
+        userId: jakob.id,
+        groupId: nodeMb.id,
+      },
+      {
+        title: "Old Hiking Trip",
+        date: daysFromNow(-5),
+        city: "Bled",
+        country: "Slovenia",
+        userId: eva.id,
+        groupId: hiking.id,
       },
     ],
   });
 
-  console.log("✔ Seed completed!");
+  // --------------------
+  // ATTENDEES
+  // --------------------
+  const allEvents = await prisma.event.findMany();
+
+  await prisma.attendee.createMany({
+    data: [
+      // Ana attends everything
+      ...allEvents.map((e) => ({
+        userId: ana.id,
+        eventId: e.id,
+      })),
+
+      // Marko attends some
+      { userId: marko.id, eventId: allEvents[0].id },
+      { userId: marko.id, eventId: allEvents[2].id },
+
+      // Jakob attends React
+      { userId: jakob.id, eventId: allEvents[0].id },
+    ],
+  });
+
+  console.log("✅ Seed completed");
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (err) => {
-    console.error("❌ Seed failed:", err);
-    await prisma.$disconnect();
+  .catch((e) => {
+    console.error(e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });

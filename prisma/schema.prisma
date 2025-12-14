@@ -43,7 +43,7 @@ model Group {
 
   // Owner
   ownerId Int
-  owner   User @relation(fields: [ownerId], references: [id])
+  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   // Relations
   members GroupMember[]
@@ -63,8 +63,8 @@ model GroupMember {
   userId  Int
   groupId Int
 
-  user  User  @relation(fields: [userId], references: [id])
-  group Group @relation(fields: [groupId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([userId, groupId])
 }
@@ -80,25 +80,21 @@ model Event {
   description String?
   date        DateTime
 
-  // Location
   city        String
   country     String
   countryCode String?
 
-  // Optional
   imageUrl    String?
   category    String?
   capacity    Int?
 
-  // Creator
   userId Int
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Group (optional!)
-  groupId Int?
-  group   Group? @relation(fields: [groupId], references: [id])
+  // 🔴 ZDAJ OBVEZNO
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  // Attendees
   attendees Attendee[]
 
   createdAt DateTime @default(now())
@@ -115,8 +111,8 @@ model Attendee {
   userId  Int
   eventId Int
 
-  user  User  @relation(fields: [userId], references: [id])
-  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([userId, eventId])
 }

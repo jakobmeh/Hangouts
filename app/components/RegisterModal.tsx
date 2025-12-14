@@ -27,13 +27,13 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
       const data = await res.json();
       setMessage(data.message);
 
-      if (res.ok) {
-        
-        setTimeout(() => {
-          onClose();
-          router.push("/"); 
-        }, 1000);
-      }
+     if (res.ok) {
+  localStorage.setItem("user", JSON.stringify(data.user));
+  window.dispatchEvent(new Event("user-login"));
+
+  onClose();
+  router.push("/");
+}
 
     } catch (err) {
       setMessage("Prišlo je do napake. Poskusi ponovno.");

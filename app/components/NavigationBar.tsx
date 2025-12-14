@@ -223,17 +223,18 @@ export default function NavigationBar() {
                   <button className="w-full text-left px-4 py-2 hover:bg-gray-100">Nastavitve</button>
 
                   <button
-  onClick={() => {
-    localStorage.removeItem("user");
+ onClick={async () => {
+  await fetch("/api/logout", { method: "POST" });
 
-    // 🔥 obvesti cel app
-    window.dispatchEvent(new Event("user-logout"));
+  localStorage.removeItem("user");
 
-    setUser(null);
-    setOpen(false);
+  window.dispatchEvent(new Event("user-logout"));
 
-    router.push("/");
-  }}
+  setUser(null);
+  setOpen(false);
+
+  router.push("/");
+}}
   className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
 >
   Odjava
