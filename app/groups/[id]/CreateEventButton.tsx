@@ -8,9 +8,9 @@ export default function CreateEventButton({ groupId }: { groupId: number }) {
   return (
     <button
       onClick={() => router.push(`/groups/${groupId}/events/new`)}
-      className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+      className="px-5 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
     >
-      Create event
+      + Create Event
     </button>
   );
 }
