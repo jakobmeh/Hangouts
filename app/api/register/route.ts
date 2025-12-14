@@ -27,13 +27,12 @@ export async function POST(req: Request) {
     const newUser = await prisma.user.create({
       data: {
         email,
-        password,
+        password, // ⚠️ kasneje obvezno hash
         name,
       },
     });
 
-   
-    return NextResponse.json({
+    const res = NextResponse.json({
       message: "Uporabnik uspešno registriran!",
       user: {
         id: newUser.id,
@@ -41,6 +40,15 @@ export async function POST(req: Request) {
         name: newUser.name,
       },
     });
+
+    // ✅ TO JE KLJUČNO
+    res.cookies.set("userId", String(newUser.id), {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+    });
+
+    return res;
   } catch (error) {
     console.error("Napaka pri registraciji:", error);
     return NextResponse.json(
