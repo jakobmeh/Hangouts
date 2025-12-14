@@ -5,6 +5,7 @@ import Sidebar from "@/app/components/sidebar";
 import EventJoinButton from "./EventJoinButton";
 import JoinLeaveButton from "./JoinLeaveButton";
 import DeleteGroupButton from "./DeleteGroupButton";
+import DeleteEventButton from "./DeleteEventButton";
 import CreateEventButton from "./CreateEventButton";
 
 import { getCurrentUser } from "@/app/lib/auth";
@@ -27,7 +28,7 @@ export default async function GroupPage({
   if (!group) return <div className="p-6">Group not found</div>;
 
   const user = await getCurrentUser();
-  const isOwner = user && user.id === group.owner.id;
+  const isGroupOwner = user && user.id === group.owner.id;
 
   const isMember =
     user && group.members.some((m: any) => m.user.id === user.id);
@@ -57,14 +58,14 @@ export default async function GroupPage({
                   <h1 className="text-4xl font-bold text-gray-900 mb-2">
                     {group.name}
                   </h1>
-                  <p className="text-gray-600 text-base">
+                  <p className="text-gray-600">
                     📍 {group.city}
                     {group.country ? `, ${group.country}` : ""}
                   </p>
                 </div>
 
                 <div className="flex gap-2">
-                  {isOwner ? (
+                  {isGroupOwner ? (
                     <DeleteGroupButton groupId={group.id} />
                   ) : (
                     <JoinLeaveButton groupId={group.id} />
@@ -72,7 +73,7 @@ export default async function GroupPage({
                 </div>
               </div>
 
-              {isOwner && (
+              {isGroupOwner && (
                 <div className="mt-6">
                   <CreateEventButton groupId={group.id} />
                 </div>
@@ -82,7 +83,7 @@ export default async function GroupPage({
 
               {/* MEMBERS */}
               <div>
-                <h2 className="text-xl font-semibold mb-5 text-gray-900">
+                <h2 className="text-xl font-semibold mb-5">
                   Members ({group.members.length})
                 </h2>
 
@@ -95,9 +96,7 @@ export default async function GroupPage({
                       <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
                         {m.user.name?.[0]?.toUpperCase() || "U"}
                       </div>
-                      <span className="text-gray-800 font-medium">
-                        {m.user.name}
-                      </span>
+                      <span className="font-medium">{m.user.name}</span>
                     </li>
                   ))}
                 </ul>
@@ -107,7 +106,7 @@ export default async function GroupPage({
 
               {/* EVENTS */}
               <div>
-                <h2 className="text-xl font-semibold mb-5 text-gray-900">
+                <h2 className="text-xl font-semibold mb-5">
                   Events ({group._count.events})
                 </h2>
 
@@ -119,6 +118,9 @@ export default async function GroupPage({
                         (a: any) => a.user.id === user.id
                       );
 
+                    const isEventOwner =
+                      user && user.id === event.userId;
+
                     const isFull =
                       event.capacity !== null &&
                       event._count.attendees >= event.capacity;
@@ -129,20 +131,21 @@ export default async function GroupPage({
                         className="p-6 bg-gray-50 border rounded-2xl"
                       >
                         <div className="flex justify-between items-start gap-6">
+                          {/* LEFT */}
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-lg font-semibold">
                               {event.title}
                             </h3>
 
                             <p className="text-sm text-gray-600 mt-1">
-                              📅 {new Date(event.date).toLocaleString()}
+                              📅{" "}
+                              {new Date(event.date).toLocaleString()}
                             </p>
 
                             <p className="text-sm text-gray-600">
                               📍 {event.city}
                             </p>
 
-                            {/* ✅ ATTENDING + CAPACITY */}
                             <p className="text-sm text-gray-600 mt-1">
                               👥 Attending {event._count.attendees}
                               {event.capacity !== null && (
@@ -166,7 +169,8 @@ export default async function GroupPage({
                                         className="w-full h-full rounded-full object-cover"
                                       />
                                     ) : (
-                                      a.user.name?.[0]?.toUpperCase() || "U"
+                                      a.user.name?.[0]?.toUpperCase() ||
+                                      "U"
                                     )}
                                   </div>
                                 ))}
@@ -174,18 +178,31 @@ export default async function GroupPage({
                             )}
                           </div>
 
-                          {isMember && user && !isFull && (
-                            <EventJoinButton
-                              eventId={event.id}
-                              initialJoined={!!joined}
-                            />
-                          )}
+                          {/* RIGHT ACTIONS */}
+                          <div className="flex flex-col items-end gap-2">
+                            {isMember && user && !isFull && (
+                              <EventJoinButton
+                                eventId={event.id}
+                                initialJoined={!!joined}
+                              />
+                            )}
 
-                          {isFull && (
-                            <span className="text-sm text-red-500 font-medium">
-                              Event is full
-                            </span>
-                          )}
+                            {isFull && (
+                              <span className="text-sm text-red-500 font-medium">
+                                Event is full
+                              </span>
+                            )}
+
+                            {isEventOwner && (
+                              <>
+                                
+
+                                <DeleteEventButton
+                                  eventId={event.id}
+                                />
+                              </>
+                            )}
+                          </div>
                         </div>
                       </li>
                     );

@@ -31,14 +31,15 @@ export async function GET(
       },
 
       // ✅ PRAVILNO: attendees + user
-  events: {
+events: {
   orderBy: { date: "asc" },
   select: {
     id: true,
     title: true,
     date: true,
     city: true,
-    capacity: true, // ✅ TO JE KLJUČNO
+    capacity: true,
+    userId: true, // ✅ TO JE KLJUČNO
     attendees: {
       include: {
         user: {
