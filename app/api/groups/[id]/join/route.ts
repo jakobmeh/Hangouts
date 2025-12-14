@@ -6,19 +6,14 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params; // ✅ NUJNO
+  const { id } = await params;
   const groupId = Number(id);
-
-  if (!Number.isFinite(groupId)) {
-    return NextResponse.json({ error: "Invalid group id" }, { status: 400 });
-  }
 
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // prepreči double join
   const exists = await prisma.groupMember.findUnique({
     where: {
       userId_groupId: {
@@ -28,16 +23,14 @@ export async function POST(
     },
   });
 
-  if (exists) {
-    return NextResponse.json({ ok: true });
+  if (!exists) {
+    await prisma.groupMember.create({
+      data: {
+        userId: user.id,
+        groupId,
+      },
+    });
   }
-
-  await prisma.groupMember.create({
-    data: {
-      userId: user.id,
-      groupId,
-    },
-  });
 
   return NextResponse.json({ ok: true });
 }

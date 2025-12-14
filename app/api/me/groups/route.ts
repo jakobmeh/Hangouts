@@ -1,0 +1,32 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/app/lib/prisma";
+import { getCurrentUser } from "@/app/lib/auth";
+
+export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json([], { status: 200 });
+  }
+
+  const groups = await prisma.group.findMany({
+    where: {
+      OR: [
+        { ownerId: user.id },
+        {
+          members: {
+            some: {
+              userId: user.id,
+            },
+          },
+        },
+      ],
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json(groups);
+}

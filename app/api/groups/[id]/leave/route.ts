@@ -6,12 +6,8 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params; // ✅ NUJNO
+  const { id } = await params;
   const groupId = Number(id);
-
-  if (!Number.isFinite(groupId)) {
-    return NextResponse.json({ error: "Invalid group id" }, { status: 400 });
-  }
 
   const user = await getCurrentUser();
   if (!user) {

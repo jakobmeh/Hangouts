@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 import NavigationBar from "./components/NavigationBar";
 import Footer from "./components/Footer";
@@ -21,14 +22,17 @@ type GroupType = {
   name: string;
   city: string;
   country?: string | null;
-  _count?: { members: number };
+  _count: {
+    members: number;
+    events: number;
+  };
 };
 
 /* ================= PAGE ================= */
 
 export default function HomePage() {
   const [user, setUser] = useState<UserType | null>(null);
-  const [groups] = useState<GroupType[]>([]); // placeholder
+  const [groups, setGroups] = useState<GroupType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
 
@@ -37,7 +41,6 @@ export default function HomePage() {
   useEffect(() => {
     const stored = localStorage.getItem("user");
     setUser(stored ? JSON.parse(stored) : null);
-    setLoading(false);
   }, []);
 
   /* ================= SYNC LOGIN / LOGOUT ================= */
@@ -55,6 +58,21 @@ export default function HomePage() {
       window.removeEventListener("user-login", syncUser);
       window.removeEventListener("user-logout", syncUser);
     };
+  }, []);
+
+  /* ================= LOAD GROUPS ================= */
+
+  useEffect(() => {
+    async function loadGroups() {
+      const res = await fetch("/api/groups");
+      if (res.ok) {
+        const data = await res.json();
+        setGroups(data.slice(0, 3)); // 🔥 pokažemo samo 3
+      }
+      setLoading(false);
+    }
+
+    loadGroups();
   }, []);
 
   /* ================= LOADING ================= */
@@ -103,20 +121,49 @@ export default function HomePage() {
       <NavigationBar />
 
       <div className="flex flex-1 p-6 gap-6">
-        <Sidebar user={user} events={[]} groups={groups} />
+       <Sidebar user={user} events={[]} />
 
         <main className="flex-1 bg-white p-6 rounded-xl border">
           <h1 className="text-2xl font-bold mb-6">
-            Welcome 👋
+            Discover groups
           </h1>
+
+          <div className="grid gap-4">
+            {groups.map((group) => (
+              <Link
+                key={group.id}
+                href={`/groups/${group.id}`}
+                className="border rounded-xl p-4 hover:shadow transition"
+              >
+                <h2 className="font-semibold">{group.name}</h2>
+                <p className="text-sm text-gray-600">
+                  {group.city}
+                  {group.country ? `, ${group.country}` : ""}
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  {group._count.members} members ·{" "}
+                  {group._count.events} events
+                </p>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-6 text-center">
+            <Link
+              href="/groups"
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg"
+            >
+              View all groups
+            </Link>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-gray-50 p-6 rounded-xl border"
+            className="mt-8 bg-gray-50 p-6 rounded-xl border"
           >
             <p className="text-gray-600">
-              You are logged in. Events are disabled for now.
+              Events coming next 🚀
             </p>
           </motion.div>
         </main>
