@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { MdLocationOn } from "react-icons/md";
+import { FiBell } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import LoginModal from "../components/LoginModal";
@@ -71,6 +72,59 @@ function NavigationBarContent() {
   const cityCache = useRef<Map<string, any[]>>(new Map());
   const abortRef = useRef<AbortController | null>(null);
   const [cityLoading, setCityLoading] = useState(false);
+
+  /* ================= NOTIFICATIONS ================= */
+  const [notifications, setNotifications] = useState<
+    { id: string; type: "event" | "message"; title: string; meta: string; createdAt: string; link: string }[]
+  >([]);
+  const [unread, setUnread] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const LAST_SEEN_KEY = "notifications-last-seen";
+
+  async function loadNotifications() {
+    try {
+      const res = await fetch("/api/notifications");
+      if (!res.ok) return;
+      const data = await res.json();
+      const lastSeen = Number(localStorage.getItem(LAST_SEEN_KEY) || "0");
+      const items =
+        data?.notifications?.map((n: any) => ({
+          id: `${n.type}-${n.id}`,
+          type: n.type,
+          title: n.title,
+          meta: n.meta,
+          createdAt: n.createdAt,
+          link: n.link,
+        })) || [];
+      setNotifications(items);
+      const fresh = items.filter((n) => new Date(n.createdAt).getTime() > lastSeen).length;
+      setUnread(fresh);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  useEffect(() => {
+    if (!user) {
+      setNotifications([]);
+      setUnread(0);
+      return;
+    }
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 60_000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
 
   useEffect(() => {
     async function fetchCities() {
@@ -148,6 +202,14 @@ function NavigationBarContent() {
     setUser(null);
     setOpen(false);
     router.push("/");
+  }
+
+  function openNotifications() {
+    setNotifOpen((prev) => !prev);
+    if (!notifOpen) {
+      localStorage.setItem(LAST_SEEN_KEY, Date.now().toString());
+      setUnread(0);
+    }
   }
 
   /* ================= UI ================= */
@@ -257,6 +319,81 @@ function NavigationBarContent() {
 
             {user && (
               <>
+                <div className="relative" ref={notifRef}>
+                  <button
+                    onClick={openNotifications}
+                    className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-200 hover:text-blue-700"
+                    aria-label="Notifications"
+                  >
+                    <FiBell className="text-lg" />
+                    {unread > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] rounded-full bg-red-500 px-1.5 text-[11px] font-semibold text-white">
+                        {unread > 9 ? "9+" : unread}
+                      </span>
+                    )}
+                  </button>
+                  {notifOpen && (
+                    <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-gray-200 bg-white shadow-2xl z-[70] overflow-hidden">
+                      <div className="border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">Notifications</p>
+                          <p className="text-xs text-gray-500">
+                            {notifications.length === 0
+                              ? "No notifications yet"
+                              : `${notifications.length} recent updates`}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            localStorage.setItem(LAST_SEEN_KEY, Date.now().toString());
+                            setUnread(0);
+                            loadNotifications();
+                          }}
+                          className="text-xs text-blue-600 hover:underline"
+                        >
+                          Refresh
+                        </button>
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <div className="px-4 py-8 text-sm text-gray-500 text-center">
+                            You're all caught up.
+                          </div>
+                        ) : (
+                          notifications.map((n) => (
+                            <button
+                              key={n.id}
+                              onClick={() => {
+                                router.push(n.link);
+                                setNotifOpen(false);
+                              }}
+                              className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-blue-50 transition"
+                            >
+                              <span
+                                className={`mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
+                                  n.type === "event"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-green-100 text-green-700"
+                                }`}
+                              >
+                                {n.type === "event" ? "EV" : "CH"}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                  {n.title}
+                                </p>
+                                <p className="text-xs text-gray-600 truncate">{n.meta}</p>
+                                <p className="text-[11px] text-gray-400">
+                                  {new Date(n.createdAt).toLocaleString()}
+                                </p>
+                              </div>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {user.isAdmin && (
                   <button
                     onClick={() => router.push("/admin")}
