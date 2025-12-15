@@ -1,26 +1,25 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 
 import NavigationBar from "@/app/components/NavigationBar";
 import Footer from "@/app/components/Footer";
 import Sidebar from "@/app/components/sidebar";
 import { getCurrentUser } from "@/app/lib/auth";
+import { prisma } from "@/app/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 /* ================= FETCH ================= */
 
 async function getGroups() {
-  const headersList = await headers();
-  const host = headersList.get("host");
-
-  const res = await fetch(`http://${host}/api/groups`, {
-    cache: "no-store",
+  return prisma.group.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      owner: { select: { id: true, name: true } },
+      _count: {
+        select: { members: true, events: true },
+      },
+    },
   });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch groups");
-  }
-
-  return res.json();
 }
 
 /* ================= PAGE ================= */
