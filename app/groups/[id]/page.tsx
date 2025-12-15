@@ -8,7 +8,7 @@ import DeleteGroupButton from "./DeleteGroupButton";
 import DeleteEventButton from "./DeleteEventButton";
 import CreateEventButton from "./CreateEventButton";
 import GroupChat from "./GroupChat";
-
+import Image from "next/image";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/auth";
 
@@ -33,6 +33,7 @@ async function getGroup(id: number) {
           title: true,
           date: true,
           city: true,
+          imageUrl: true,
           capacity: true,
           userId: true,
           attendees: {
@@ -100,7 +101,7 @@ export default async function GroupPage({
               href="/groups"
               className="text-sm text-gray-600 hover:text-blue-600 inline-flex items-center mb-6"
             >
-              ƒ+? Back to groups
+             ←  Back to groups
             </Link>
 
             <section className="bg-white rounded-3xl border border-gray-200 shadow-xl shadow-blue-100/50 p-8 lg:p-10 space-y-8">
@@ -114,9 +115,17 @@ export default async function GroupPage({
                     <h1 className="text-4xl font-bold text-gray-900 mb-1">
                       {group.name}
                     </h1>
-                    <p className="text-gray-600 text-sm">
-                      dY"? {group.city}
-                      {group.country ? `, ${group.country}` : ""}
+                    <p className="text-gray-600 text-sm flex items-center gap-2">
+                      <Image
+                        src="/icons/placeholder.png"
+                        alt="Location"
+                        width={18}
+                        height={18}
+                      />
+                      <span>
+                        {group.city}
+                        {group.country ? `, ${group.country}` : ""}
+                      </span>
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -205,23 +214,52 @@ export default async function GroupPage({
                           <div className="flex justify-between items-start gap-6">
                             {/* LEFT */}
                             <div className="space-y-1.5">
+                              {event.imageUrl && (
+                                <div className="w-28 h-28 rounded-xl overflow-hidden border border-gray-200 bg-white">
+                                  <img
+                                    src={event.imageUrl}
+                                    alt={event.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
                               <h3 className="text-lg font-semibold text-gray-900">
                                 {event.title}
                               </h3>
 
-                              <p className="text-sm text-gray-600">
-                                dY". {new Date(event.date).toLocaleString()}
+                              <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <Image
+                                  src="/icons/schedule.png"
+                                  alt="Date"
+                                  width={18}
+                                  height={18}
+                                />
+                                <span>{new Date(event.date).toLocaleString()}</span>
                               </p>
 
-                              <p className="text-sm text-gray-600">
-                                dY"? {event.city}
+                              <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <Image
+                                  src="/icons/placeholder.png"
+                                  alt="Location"
+                                  width={18}
+                                  height={18}
+                                />
+                                <span>{event.city}</span>
                               </p>
 
-                              <p className="text-sm text-gray-700">
-                                dY` Attending {event._count.attendees}
-                                {event.capacity !== null && (
-                                  <span> / {event.capacity}</span>
-                                )}
+                              <p className="text-sm text-gray-700 flex items-center gap-2">
+                                <Image
+                                  src="/icons/groups.png"
+                                  alt="Attendees"
+                                  width={18}
+                                  height={18}
+                                />
+                                <span>
+                                  {event._count.attendees}
+                                  {event.capacity !== null && (
+                                    <span> / {event.capacity}</span>
+                                  )}
+                                </span>
                               </p>
 
                               {/* AVATARS */}

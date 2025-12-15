@@ -9,7 +9,7 @@ import Footer from "./components/Footer";
 import RegisterModal from "./components/RegisterModal";
 import Sidebar from "./components/sidebar";
 import Skeleton from "./components/Skeleton";
-
+import Image from "next/image";
 /* ================= TYPES ================= */
 
 type UserType = {
@@ -267,19 +267,40 @@ export default function HomePage() {
                   {group.name}
                 </h2>
 
-                <p className="text-sm text-gray-600 mt-1">
-                  📍 {group.city}
-                  {group.country ? `, ${group.country}` : ""}
-                </p>
+               <p className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+  <Image
+    src="/icons/placeholder.png"
+    alt="Location"
+    width={18}
+    height={18}
+  />
+  <span>
+    {group.city}
+    {group.country ? `, ${group.country}` : ""}
+  </span>
+</p>
 
-                <div className="mt-4 flex gap-4 text-xs text-gray-500">
-                  <span>
-                    👥 {group._count.members} members
-                  </span>
-                  <span>
-                    📅 {group._count.events} events
-                  </span>
-                </div>
+<div className="mt-4 flex gap-4 text-xs text-gray-500">
+  <span className="flex items-center gap-1">
+    <Image
+      src="/icons/groups.png"
+      alt="Members"
+      width={18}
+      height={18}
+    />
+    {group._count.members} members
+  </span>
+
+  <span className="flex items-center gap-1">
+    <Image
+      src="/icons/event-list.png"
+      alt="Events"
+      width={18}
+      height={18}
+    />
+    {group._count.events} events
+  </span>
+</div>
               </Link>
             ))}
         </div>

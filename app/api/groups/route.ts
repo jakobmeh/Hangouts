@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { name, description, city, country } = body;
+  const { name, description, city, country, imageUrl } = body;
 
   if (!name || !city) {
     return NextResponse.json(
@@ -38,6 +38,7 @@ export async function POST(req: Request) {
     data: {
       name,
       description,
+      imageUrl,
       city,
       country,
       ownerId: user.id,

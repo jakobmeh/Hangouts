@@ -12,21 +12,24 @@ export default function NewEventPage() {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [city, setCity] = useState("");
-const [capacity, setCapacity] = useState<number | "">("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [capacity, setCapacity] = useState<number | "">("");
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     const res = await fetch(`/api/groups/${groupId}/events`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-     body: JSON.stringify({
-  title,
-  description,
-  date,
-  city,
-  country: "Slovenia",
-  capacity: capacity === "" ? null : capacity, // ✅ TO JE KLJUČNO
-}),
+      body: JSON.stringify({
+        title,
+        description,
+        date,
+        city,
+        country: "Slovenia",
+        imageUrl,
+        capacity: capacity === "" ? null : capacity,
+      }),
     });
 
     if (res.ok) {
@@ -68,23 +71,55 @@ const [capacity, setCapacity] = useState<number | "">("");
         />
 
         <input
-          className="w-full border border-gray-300 rounded-lg p-3 mb-6 text-gray-900 placeholder:text-gray-600"
+          className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-600"
           placeholder="City"
           value={city}
           onChange={(e) => setCity(e.target.value)}
           required
         />
 
+        <div className="space-y-2 mb-2">
+          <label className="block text-sm font-semibold text-gray-700">
+            Event image (upload or URL)
+          </label>
+          <label className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 cursor-pointer hover:underline w-fit">
+            Upload from device
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => setImageUrl(reader.result as string);
+                reader.readAsDataURL(file);
+              }}
+            />
+          </label>
+          <input
+            className="w-full border border-gray-300 rounded-lg p-3 text-gray-900 placeholder:text-gray-600"
+            placeholder="Image URL (optional)"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+          />
+          {imageUrl && (
+            <div className="h-32 w-full rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+              <img src={imageUrl} alt="Event" className="h-full w-full object-cover" />
+            </div>
+          )}
+        </div>
+
         <input
-  type="number"
-  min={1}
-  className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-600"
-  placeholder="Capacity (optional)"
-  value={capacity}
-  onChange={(e) =>
-    setCapacity(e.target.value ? Number(e.target.value) : "")
-  }
-/>
+          type="number"
+          min={1}
+          className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-600"
+          placeholder="Capacity (optional)"
+          value={capacity}
+          onChange={(e) =>
+            setCapacity(e.target.value ? Number(e.target.value) : "")
+          }
+        />
 
         <button
           type="submit"

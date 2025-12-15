@@ -11,6 +11,9 @@ export async function GET(req: Request) {
   const type = searchParams.get("type") || ""; 
   const sort = searchParams.get("sort") || ""; 
 
+  const pageSize = Number(searchParams.get("pageSize") || "9");
+  const page = Math.max(1, Number(searchParams.get("page") || "1"));
+
   let events = await prisma.event.findMany({
     select: {
       id: true,
@@ -19,6 +22,7 @@ export async function GET(req: Request) {
       date: true,
       city: true,
       country: true,
+      imageUrl: true,
       category: true,
       capacity: true,
       userId: true,
@@ -104,5 +108,9 @@ export async function GET(req: Request) {
     );
   }
 
-  return NextResponse.json({ events });
+  const total = events.length;
+  const start = (page - 1) * pageSize;
+  const paged = events.slice(start, start + pageSize);
+
+  return NextResponse.json({ events: paged, total, page, pageSize });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import NavigationBar from "@/app/components/NavigationBar";
 import Footer from "@/app/components/Footer";
@@ -39,24 +39,45 @@ function SearchPageContent() {
 
   const eventQuery = params.get("event")?.trim() || "";
   const cityQuery = params.get("city")?.trim() || "";
+  const pageParam = Number(params.get("page") || "1");
 
   const [events, setEvents] = useState<EventType[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [page, setPage] = useState(pageParam);
+  const [total, setTotal] = useState(0);
+  const pageSize = 9;
+
+  useEffect(() => {
+    setPage(pageParam);
+  }, [pageParam]);
 
   useEffect(() => {
     async function loadData() {
-      const url =
-        `/api/filter?event=${encodeURIComponent(eventQuery)}&city=${encodeURIComponent(cityQuery)}`;
+      const url = `/api/filter?event=${encodeURIComponent(eventQuery)}&city=${encodeURIComponent(
+        cityQuery
+      )}&page=${page}&pageSize=${pageSize}`;
 
       const res = await fetch(url);
       const data = await res.json();
 
       setEvents(data.events || []);
+      setTotal(data.total || 0);
       setLoaded(true);
     }
 
     loadData();
-  }, [eventQuery, cityQuery]);
+  }, [eventQuery, cityQuery, page]);
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  function goToPage(nextPage: number) {
+    const clamped = Math.min(Math.max(nextPage, 1), totalPages);
+    const query = new URLSearchParams();
+    if (eventQuery) query.set("event", eventQuery);
+    if (cityQuery) query.set("city", cityQuery);
+    query.set("page", String(clamped));
+    router.push(`/search?${query.toString()}`);
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -64,6 +85,15 @@ function SearchPageContent() {
 
       <main className="flex-1">
         <section className="max-w-5xl mx-auto px-6 py-10">
+          <div className="mb-4">
+            <button
+              onClick={() => router.push("/")}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
+            >
+              ← Back to home
+            </button>
+          </div>
+
           <header className="mb-8 space-y-2">
             <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium">
               Search
@@ -88,6 +118,15 @@ function SearchPageContent() {
                   onClick={() => router.push(`/groups/${event.groupId}`)}
                   className="text-left bg-white/90 border border-gray-200 rounded-2xl shadow-lg shadow-blue-50 p-5 flex flex-col gap-3 hover:shadow-blue-100 transition"
                 >
+                  {event.imageUrl && (
+                    <div className="h-32 rounded-xl overflow-hidden border border-gray-100">
+                      <img
+                        src={event.imageUrl}
+                        alt={event.title}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900">
@@ -122,8 +161,40 @@ function SearchPageContent() {
             </div>
           )}
         </section>
-      </main>
+        <div className="mt-8 flex items-center justify-center gap-3">
+       <button
+  onClick={() => goToPage(page - 1)}
+  disabled={page <= 1}
+  className="
+    px-4 py-2 rounded-lg text-sm font-semibold
+    bg-blue-600 text-white
+    hover:bg-blue-700
+    disabled:bg-blue-300 disabled:cursor-not-allowed
+    transition
+  "
+>
+  Prev
+</button>
 
+<span className="text-sm text-gray-700">
+  Page {page} of {totalPages}
+</span>
+
+<button
+  onClick={() => goToPage(page + 1)}
+  disabled={page >= totalPages}
+  className="
+    px-4 py-2 rounded-lg text-sm font-semibold
+    bg-blue-600 text-white
+    hover:bg-blue-700
+    disabled:bg-blue-300 disabled:cursor-not-allowed
+    transition
+  "
+>
+  Next
+</button>
+        </div>
+      </main>
       <Footer />
     </div>
   );

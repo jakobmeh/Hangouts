@@ -6,7 +6,7 @@ export async function POST(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params; // ✅ AWAIT PARAMS
+  const { id } = await context.params;
 
   const user = await getCurrentUser();
   if (!user) {
@@ -22,10 +22,10 @@ export async function POST(
       date: new Date(body.date),
       city: body.city,
       country: body.country,
+      imageUrl: body.imageUrl || null,
       capacity: body.capacity,
       userId: user.id,
-      groupId: Number(id), // ✅ zdaj NI več NaN
-      
+      groupId: Number(id),
     },
   });
 

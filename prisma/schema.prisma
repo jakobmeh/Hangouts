@@ -45,6 +45,7 @@ model Group {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
+  imageUrl    String?
   city        String
   country     String?
 
@@ -134,8 +135,8 @@ model GroupMessage {
   groupId  Int
   createdAt DateTime @default(now())
 
-  user  User  @relation(fields: [userId], references: [id])
-  group Group @relation(fields: [groupId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 // ────────────────────────────────────────────
 // NEXT-AUTH MODELS (OBVEZNO ZA PrismaAdapter)

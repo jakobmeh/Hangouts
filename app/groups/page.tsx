@@ -5,6 +5,7 @@ import Footer from "@/app/components/Footer";
 import Sidebar from "@/app/components/sidebar";
 import { getCurrentUser } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -79,22 +80,51 @@ export default async function GroupsPage() {
                 href={`/groups/${group.id}`}
                 className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg hover:border-gray-300 transition group"
               >
+                {group.imageUrl && (
+                  <div className="mb-4 h-32 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                    <img
+                      src={group.imageUrl}
+                      alt={group.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
                 <h2 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition">
                   {group.name}
                 </h2>
 
-                <p className="text-sm text-gray-500 mt-1">
-                  📍 {group.city}
-                  {group.country ? `, ${group.country}` : ""}
-                </p>
+              <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+  <Image
+    src="/icons/placeholder.png"   // ali katerokoli ikono imaš
+    alt="Location"
+    width={18}
+    height={18}
+  />
+  <span>
+    {group.city}
+    {group.country ? `, ${group.country}` : ""}
+  </span>
+</div>
 
                 <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
-                    👥 {group._count.members}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    📅 {group._count.events}
-                  </span>
+  <Image
+    src="/icons/groups.png"   // ali group.png / people.png
+    alt="Members"
+    width={18}
+    height={18}
+  />
+  {group._count.members}
+</span>
+                 <span className="flex items-center gap-1">
+  <Image
+    src="/icons/schedule.png"
+    alt="Events"
+    width={18}
+    height={18}
+  />
+  {group._count.events}
+</span>
                 </div>
               </Link>
             ))}

@@ -3,207 +3,125 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-   console.log("🧹 Cleaning database...");
+  console.log("🌱 Seeding database...");
 
-  await prisma.attendee.deleteMany();
-  await prisma.event.deleteMany();
-  await prisma.groupMember.deleteMany();
-  await prisma.group.deleteMany();
-  await prisma.user.deleteMany();
-  // --------------------
+  // ─────────────────────────────
   // USERS
-  // --------------------
-  const ana = await prisma.user.create({
+  // ─────────────────────────────
+  const admin = await prisma.user.create({
     data: {
-      email: "ana@gmail.com",
-      name: "Ana",
-      password: "123",
+      email: "admin@hangouts.app",
+      name: "Admin",
+      password: "seeded-password",
+      isAdmin: true,
     },
   });
 
-  const marko = await prisma.user.create({
-    data: {
-      email: "marko@gmail.com",
-      name: "Marko",
-      password: "123",
-    },
-  });
+  const users = await Promise.all(
+    Array.from({ length: 10 }).map((_, i) =>
+      prisma.user.create({
+        data: {
+          email: `user${i + 1}@hangouts.app`,
+          name: `User ${i + 1}`,
+          password: "seeded-password",
+        },
+      })
+    )
+  );
 
-  const jakob = await prisma.user.create({
-    data: {
-      email: "jakob@gmail.com",
-      name: "Jakob",
-      password: "123",
-    },
-  });
-
-  const eva = await prisma.user.create({
-    data: {
-      email: "eva@gmail.com",
-      name: "Eva",
-      password: "123",
-    },
-  });
-
-  // --------------------
+  // ─────────────────────────────
   // GROUPS
-  // --------------------
-  const reactLj = await prisma.group.create({
-    data: {
-      name: "React Ljubljana",
-      city: "Ljubljana",
-      country: "Slovenia",
-      ownerId: ana.id,
-    },
-  });
+  // ─────────────────────────────
+  const cities = ["Ljubljana", "Maribor", "Koper", "Celje", "Kranj"];
+  const categories = ["Tech", "Sports", "Music", "Startup", "Social"];
 
-  const nodeMb = await prisma.group.create({
-    data: {
-      name: "Node.js Maribor",
-      city: "Maribor",
-      country: "Slovenia",
-      ownerId: jakob.id,
-    },
-  });
+  const groups = [];
 
-  const uxGroup = await prisma.group.create({
-    data: {
-      name: "UX Designers",
-      city: "Ljubljana",
-      country: "Slovenia",
-      ownerId: ana.id,
-    },
-  });
+  for (let i = 0; i < 8; i++) {
+    const group = await prisma.group.create({
+      data: {
+        name: `Hangout Group ${i + 1}`,
+        description: `Awesome group number ${i + 1}`,
+        city: cities[i % cities.length],
+        country: "Slovenia",
+        ownerId: admin.id,
+      },
+    });
 
-  const hiking = await prisma.group.create({
-    data: {
-      name: "Hiking Slovenia",
-      city: "Bled",
-      country: "Slovenia",
-      ownerId: eva.id,
-    },
-  });
+    groups.push(group);
 
-  // --------------------
-  // GROUP MEMBERS
-  // --------------------
-  await prisma.groupMember.createMany({
-    data: [
-      { userId: ana.id, groupId: reactLj.id },
-      { userId: ana.id, groupId: uxGroup.id },
-      { userId: ana.id, groupId: nodeMb.id },
+    // ─────────────────────────────
+    // GROUP MEMBERS
+    // ─────────────────────────────
+    for (const user of users) {
+      if (Math.random() > 0.4) {
+        await prisma.groupMember.create({
+          data: {
+            userId: user.id,
+            groupId: group.id,
+          },
+        });
+      }
+    }
 
-      { userId: marko.id, groupId: reactLj.id },
-      { userId: marko.id, groupId: hiking.id },
+    // Admin always member
+    await prisma.groupMember.create({
+      data: {
+        userId: admin.id,
+        groupId: group.id,
+      },
+    });
+  }
 
-      { userId: jakob.id, groupId: reactLj.id },
-    ],
-  });
-
-  // --------------------
-  // DATES HELPERS
-  // --------------------
-  const daysFromNow = (d: number) =>
-    new Date(Date.now() + d * 24 * 60 * 60 * 1000);
-
-  // --------------------
+  // ─────────────────────────────
   // EVENTS
-  // --------------------
-  const events = await prisma.event.createMany({
-    data: [
-      // FUTURE EVENTS
-      {
-        title: "React Meetup #1",
-        date: daysFromNow(5),
-        city: "Ljubljana",
-        country: "Slovenia",
-        userId: ana.id,
-        groupId: reactLj.id,
-      },
-      {
-        title: "Advanced React Patterns",
-        date: daysFromNow(12),
-        city: "Ljubljana",
-        country: "Slovenia",
-        userId: ana.id,
-        groupId: reactLj.id,
-      },
-      {
-        title: "Node.js Backend Night",
-        date: daysFromNow(7),
-        city: "Maribor",
-        country: "Slovenia",
-        userId: jakob.id,
-        groupId: nodeMb.id,
-      },
-      {
-        title: "UX Research Workshop",
-        date: daysFromNow(15),
-        city: "Ljubljana",
-        country: "Slovenia",
-        userId: ana.id,
-        groupId: uxGroup.id,
-      },
-      {
-        title: "Sunday Hiking Trip",
-        date: daysFromNow(10),
-        city: "Bled",
-        country: "Slovenia",
-        userId: eva.id,
-        groupId: hiking.id,
-      },
+  // ─────────────────────────────
+  for (const group of groups) {
+    for (let i = 0; i < 5; i++) {
+      const event = await prisma.event.create({
+        data: {
+          title: `Event ${i + 1} – ${group.name}`,
+          description: "Seeded event for demo purposes",
+          date: new Date(Date.now() + 1000 * 60 * 60 * 24 * (i + 1)),
+          city: group.city,
+          country: "Slovenia",
+          category: categories[i % categories.length],
+          capacity: 10 + i * 5,
+          userId: admin.id,
+          groupId: group.id,
+        },
+      });
 
-      // PAST EVENTS
-      {
-        title: "Old React Meetup",
-        date: daysFromNow(-10),
-        city: "Ljubljana",
-        country: "Slovenia",
-        userId: ana.id,
-        groupId: reactLj.id,
+      // ─────────────────────────────
+      // ATTENDEES
+      // ─────────────────────────────
+      for (const user of users) {
+        if (Math.random() > 0.5) {
+          await prisma.attendee.create({
+            data: {
+              userId: user.id,
+              eventId: event.id,
+            },
+          });
+        }
+      }
+    }
+  }
+
+  // ─────────────────────────────
+  // GROUP MESSAGES
+  // ─────────────────────────────
+  for (const group of groups) {
+    await prisma.groupMessage.create({
+      data: {
+        content: `Welcome to ${group.name}! 🎉`,
+        userId: admin.id,
+        groupId: group.id,
       },
-      {
-        title: "Past Node Meetup",
-        date: daysFromNow(-20),
-        city: "Maribor",
-        country: "Slovenia",
-        userId: jakob.id,
-        groupId: nodeMb.id,
-      },
-      {
-        title: "Old Hiking Trip",
-        date: daysFromNow(-5),
-        city: "Bled",
-        country: "Slovenia",
-        userId: eva.id,
-        groupId: hiking.id,
-      },
-    ],
-  });
+    });
+  }
 
-  // --------------------
-  // ATTENDEES
-  // --------------------
-  const allEvents = await prisma.event.findMany();
-
-  await prisma.attendee.createMany({
-    data: [
-      // Ana attends everything
-      ...allEvents.map((e) => ({
-        userId: ana.id,
-        eventId: e.id,
-      })),
-
-      // Marko attends some
-      { userId: marko.id, eventId: allEvents[0].id },
-      { userId: marko.id, eventId: allEvents[2].id },
-
-      // Jakob attends React
-      { userId: jakob.id, eventId: allEvents[0].id },
-    ],
-  });
-
-  console.log("✅ Seed completed");
+  console.log("✅ Database seeded with LOTS of data");
 }
 
 main()

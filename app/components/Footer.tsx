@@ -51,7 +51,7 @@ export default function Footer() {
     </p>
 
     <Link
-      href="/groups/new"
+      href=""
       className="
         inline-flex items-center justify-center
         px-6 py-3 rounded-full
