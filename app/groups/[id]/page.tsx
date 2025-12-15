@@ -9,14 +9,53 @@ import DeleteEventButton from "./DeleteEventButton";
 import CreateEventButton from "./CreateEventButton";
 import GroupChat from "./GroupChat";
 
+import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/auth";
 
-async function getGroup(id: string) {
-  const res = await fetch(`http://localhost:3000/api/groups/${id}`, {
-    cache: "no-store",
+async function getGroup(id: number) {
+  return prisma.group.findUnique({
+    where: { id },
+    include: {
+      owner: {
+        select: { id: true, name: true },
+      },
+      members: {
+        include: {
+          user: {
+            select: { id: true, name: true, image: true },
+          },
+        },
+      },
+      events: {
+        orderBy: { date: "asc" },
+        select: {
+          id: true,
+          title: true,
+          date: true,
+          city: true,
+          capacity: true,
+          userId: true,
+          attendees: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
+          _count: {
+            select: { attendees: true },
+          },
+        },
+      },
+      _count: {
+        select: { members: true, events: true },
+      },
+    },
   });
-  if (!res.ok) return null;
-  return res.json();
 }
 
 export default async function GroupPage({
@@ -25,7 +64,13 @@ export default async function GroupPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const group = await getGroup(id);
+  const groupId = Number(id);
+
+  if (!Number.isFinite(groupId)) {
+    return <div className="p-6">Invalid group id</div>;
+  }
+
+  const group = await getGroup(groupId);
   if (!group) return <div className="p-6">Group not found</div>;
 
   const user = await getCurrentUser();
