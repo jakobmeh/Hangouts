@@ -1,7 +1,7 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 type EventType = {
   id: number;
@@ -22,6 +22,14 @@ type EventType = {
 };
 
 export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-gray-500">Loading...</div>}>
+      <SearchPageContent />
+    </Suspense>
+  );
+}
+
+function SearchPageContent() {
   const params = useSearchParams();
 
   const eventQuery = params.get("event")?.trim() || "";
