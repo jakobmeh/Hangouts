@@ -151,8 +151,84 @@ export default function AdminPage() {
         )}
 
         {loading && (
-          <div className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-slate-200">
-            Loading data...
+          <div className="grid gap-6 lg:grid-cols-[240px,1fr]">
+            <aside className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-black/30">
+              <p className="mb-3 h-4 w-16 animate-pulse rounded bg-slate-800" />
+              <div className="space-y-2">
+                {[1, 2].map((key) => (
+                  <div
+                    key={key}
+                    className="h-10 w-full animate-pulse rounded-lg bg-slate-800"
+                  />
+                ))}
+              </div>
+            </aside>
+
+            <main className="space-y-6">
+              <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-6 w-24 animate-pulse rounded bg-slate-800" />
+                  <div className="h-4 w-16 animate-pulse rounded bg-slate-800" />
+                </div>
+                <div className="space-y-3">
+                  {[1, 2, 3].map((key) => (
+                    <div
+                      key={key}
+                      className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-md shadow-black/30"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="space-y-2">
+                          <div className="h-4 w-40 animate-pulse rounded bg-slate-800" />
+                          <div className="h-4 w-28 animate-pulse rounded bg-slate-800" />
+                          <div className="h-3 w-24 animate-pulse rounded bg-slate-800" />
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="h-8 w-16 animate-pulse rounded-lg bg-slate-800" />
+                          <div className="h-8 w-20 animate-pulse rounded-lg bg-slate-800" />
+                          <div className="h-8 w-16 animate-pulse rounded-lg bg-slate-800" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
+                <div className="space-y-3">
+                  {[1, 2, 3].map((key) => (
+                    <div
+                      key={key}
+                      className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-md shadow-black/30"
+                    >
+                      <div className="space-y-2">
+                        <div className="h-4 w-36 animate-pulse rounded bg-slate-800" />
+                        <div className="h-4 w-28 animate-pulse rounded bg-slate-800" />
+                        <div className="h-3 w-32 animate-pulse rounded bg-slate-800" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-md shadow-black/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 w-24 animate-pulse rounded bg-slate-800" />
+                    <div className="h-4 w-12 animate-pulse rounded bg-slate-800" />
+                  </div>
+                  <div className="space-y-2">
+                    {[1, 2].map((key) => (
+                      <div
+                        key={key}
+                        className="rounded-lg border border-slate-800 bg-slate-950 p-3"
+                      >
+                        <div className="space-y-2">
+                          <div className="h-4 w-32 animate-pulse rounded bg-slate-800" />
+                          <div className="h-3 w-24 animate-pulse rounded bg-slate-800" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            </main>
           </div>
         )}
 
