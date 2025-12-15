@@ -30,7 +30,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const userData = { id: user.id, email: user.email, name: user.name };
+    const userData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isAdmin: user.isAdmin,
+      image: user.image,
+    };
 
     // ⬇️ TO JE EDINA NOVA STVAR
     const res = NextResponse.json({

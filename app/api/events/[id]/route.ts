@@ -22,8 +22,8 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // ❌ only owner can delete
-  if (event.userId !== user.id) {
+  // ƒ?O only owner can delete (admin override)
+  if (!user.isAdmin && event.userId !== user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

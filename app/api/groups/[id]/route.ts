@@ -97,7 +97,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (group.ownerId !== user.id) {
+  if (!user.isAdmin && group.ownerId !== user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "Uporabnik že obstaja." },
+        { message: "Uporabnik _e obstaja." },
         { status: 400 }
       );
     }
@@ -27,21 +27,24 @@ export async function POST(req: Request) {
     const newUser = await prisma.user.create({
       data: {
         email,
-        password, // ⚠️ kasneje obvezno hash
+        password, // ƒsÿ‹,? kasneje obvezno hash
         name,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        isAdmin: true,
       },
     });
 
     const res = NextResponse.json({
-      message: "Uporabnik uspešno registriran!",
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-      },
+      message: "Uporabnik uspe­no registriran!",
+      user: newUser,
     });
 
-    // ✅ TO JE KLJUČNO
+    // ƒo. TO JE KLJUŽONO
     res.cookies.set("userId", String(newUser.id), {
       httpOnly: true,
       path: "/",
@@ -52,7 +55,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Napaka pri registraciji:", error);
     return NextResponse.json(
-      { message: "Napaka strežnika." },
+      { message: "Napaka stre_nika." },
       { status: 500 }
     );
   }

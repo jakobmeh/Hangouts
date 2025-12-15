@@ -12,5 +12,12 @@ const userId = cookieStore.get("userId")?.value;
 
   return prisma.user.findUnique({
     where: { id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      image: true,
+      isAdmin: true,
+    },
   });
 }

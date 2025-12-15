@@ -23,7 +23,23 @@ function NavigationBarContent() {
   useEffect(() => {
     function syncUser() {
       const stored = localStorage.getItem("user");
-      setUser(stored ? JSON.parse(stored) : null);
+      const parsed = stored ? JSON.parse(stored) : null;
+
+      if (parsed && parsed.isAdmin === undefined) {
+        fetch("/api/me")
+          .then((res) => (res.ok ? res.json() : null))
+          .then((fresh) => {
+            if (fresh) {
+              localStorage.setItem("user", JSON.stringify(fresh));
+              setUser(fresh);
+            } else {
+              setUser(parsed);
+            }
+          })
+          .catch(() => setUser(parsed));
+      } else {
+        setUser(parsed);
+      }
     }
 
     syncUser();
@@ -241,6 +257,14 @@ function NavigationBarContent() {
 
             {user && (
               <>
+                {user.isAdmin && (
+                  <button
+                    onClick={() => router.push("/admin")}
+                    className="hidden sm:inline-flex items-center rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
+                  >
+                    Admin Panel
+                  </button>
+                )}
                 <div
                   className="flex items-center gap-2 cursor-pointer"
                   onClick={() => setOpen(!open)}

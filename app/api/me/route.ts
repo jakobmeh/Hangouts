@@ -30,6 +30,13 @@ export async function PUT(req: Request) {
       name,
       image,
     },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      image: true,
+      isAdmin: true,
+    },
   });
 
   return NextResponse.json(updatedUser);
