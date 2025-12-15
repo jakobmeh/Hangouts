@@ -158,73 +158,130 @@ export default function HomePage() {
   /* ================= LOGGED IN ================= */
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <NavigationBar />
+  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex flex-col">
+    <NavigationBar />
 
-      <div className="flex flex-1 p-6 gap-6">
-        {/* SIDEBAR */}
-        <Sidebar user={user} />
+    <div className="flex flex-1 max-w-7xl mx-auto w-full px-6 py-8 gap-8">
+      {/* SIDEBAR */}
+      <Sidebar user={user} />
 
-        {/* MAIN */}
-        <main className="flex-1 bg-white p-6 rounded-xl border">
-          <h1 className="text-2xl font-bold mb-6">
-            Discover groups
-          </h1>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {groups
-              .filter((group) => !myGroupIds.includes(group.id))
-              .map((group) => (
-                <Link
-                  key={group.id}
-                  href={`/groups/${group.id}`}
-                  className="border rounded-xl p-4 hover:shadow transition bg-gray-50"
-                >
-                  <h2 className="font-semibold">{group.name}</h2>
-
-                  <p className="text-sm text-gray-600">
-                    📍 {group.city}
-                    {group.country ? `, ${group.country}` : ""}
-                  </p>
-
-                  <p className="text-xs text-gray-500 mt-2">
-                    {group._count.members} members ·{" "}
-                    {group._count.events} events
-                  </p>
-                </Link>
-              ))}
-          </div>
-
-          {groups.filter((g) => !myGroupIds.includes(g.id)).length === 0 && (
-            <p className="text-gray-500 mt-10 text-center">
-              🎉 You already joined all available groups
+      {/* MAIN */}
+      <main className="
+        flex-1
+        bg-white/80 backdrop-blur
+        rounded-3xl
+        border border-gray-200
+        shadow-sm
+        p-8
+      ">
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900">
+              Discover groups
+            </h1>
+            <p className="text-gray-500 mt-1">
+              Find communities and start meeting people
             </p>
-          )}
-
-          <div className="mt-6 text-center">
-            <Link
-              href="/groups"
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              View all groups
-            </Link>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mt-8 bg-gray-50 p-6 rounded-xl border"
+         
+        </div>
+
+        {/* GROUPS GRID */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {groups
+            .filter((group) => !myGroupIds.includes(group.id))
+            .map((group) => (
+              <Link
+                key={group.id}
+                href={`/groups/${group.id}`}
+                className="
+                  group
+                  rounded-2xl
+                  border border-gray-200
+                  bg-gradient-to-br from-white via-gray-50 to-gray-100
+                  p-6
+                  hover:shadow-md
+                  hover:-translate-y-0.5
+                  transition-all
+                "
+              >
+                <h2 className="
+                  font-semibold text-lg text-gray-900
+                  group-hover:text-blue-600 transition
+                ">
+                  {group.name}
+                </h2>
+
+                <p className="text-sm text-gray-600 mt-1">
+                  📍 {group.city}
+                  {group.country ? `, ${group.country}` : ""}
+                </p>
+
+                <div className="mt-4 flex gap-4 text-xs text-gray-500">
+                  <span>
+                    👥 {group._count.members} members
+                  </span>
+                  <span>
+                    📅 {group._count.events} events
+                  </span>
+                </div>
+              </Link>
+            ))}
+        </div>
+
+        {/* EMPTY STATE */}
+        {groups.filter((g) => !myGroupIds.includes(g.id)).length === 0 && (
+          <div className="mt-16 text-center">
+            <div className="text-4xl mb-4">🎉</div>
+            <p className="text-gray-600 text-lg">
+              You already joined all available groups
+            </p>
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="mt-10 text-center">
+          <Link
+            href="/groups"
+            className="
+              inline-flex items-center justify-center
+              px-8 py-4 rounded-full
+              bg-blue-600 text-white font-semibold
+              shadow-lg shadow-blue-600/30
+              hover:bg-blue-700 hover:shadow-blue-700/40
+              transition
+            "
           >
-            <p className="text-gray-600">
-              Events coming next 🚀
-            </p>
-          </motion.div>
-        </main>
-      </div>
+            Explore all groups
+          </Link>
+        </div>
 
-      <Footer />
+        {/* COMING SOON */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="
+            mt-12
+            bg-gradient-to-br from-gray-50 to-white
+            border border-dashed border-gray-300
+            rounded-2xl
+            p-6
+            text-center
+          "
+        >
+          <p className="text-gray-500 font-medium">
+            🚀 Events coming next
+          </p>
+        </motion.div>
+      </main>
     </div>
-  );
+
+    <Footer />
+  </div>
+);
+
 }
 
 

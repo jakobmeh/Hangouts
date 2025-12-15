@@ -78,6 +78,9 @@ export default async function GroupPage({
 
   const isMember =
     user && group.members.some((m: any) => m.user.id === user.id);
+  const upcomingEvents = group.events.filter(
+    (event: any) => new Date(event.date).getTime() > Date.now()
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -90,7 +93,8 @@ export default async function GroupPage({
           </div>
         </aside>
 
-        <main className="flex-1">
+       <main className="flex-1 pl-2 lg:pl-6">
+
           <div className="max-w-5xl">
             <Link
               href="/groups"
@@ -170,16 +174,16 @@ export default async function GroupPage({
               {/* EVENTS */}
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Events ({group._count.events})
+                  Events ({upcomingEvents.length})
                 </h2>
 
-                {group.events.length === 0 ? (
+                {upcomingEvents.length === 0 ? (
                   <div className="p-5 rounded-2xl border border-dashed border-gray-200 bg-gray-50 text-gray-700">
                     No events yet. {isGroupOwner ? "Create one to get started." : "Check back soon."}
                   </div>
                 ) : (
                   <ul className="space-y-4">
-                    {group.events.map((event: any) => {
+                    {upcomingEvents.map((event: any) => {
                       const joined =
                         user &&
                         event.attendees.some(

@@ -24,6 +24,10 @@ export async function GET() {
         select: {
           id: true,
           title: true,
+          date: true,
+          attendees: {
+            select: { userId: true },
+          },
         },
       },
     },
