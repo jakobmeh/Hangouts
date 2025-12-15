@@ -102,6 +102,21 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
           {loading ? "Signing up..." : "Create account"}
         </button>
 
+        <div className="my-4 flex items-center gap-3 text-xs text-gray-400">
+          <span className="flex-1 border-t" />
+          <span>or</span>
+          <span className="flex-1 border-t" />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => (window.location.href = "/api/auth/signin/google")}
+          className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-800 font-semibold py-3 rounded-xl hover:border-blue-400 hover:text-blue-600 transition"
+        >
+          <img src="/icons/google.png" alt="" className="h-5 w-5" />
+          Continue with Google
+        </button>
+
         {message && (
           <p className="mt-4 text-gray-700 text-sm font-medium">{message}</p>
         )}

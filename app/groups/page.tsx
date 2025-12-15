@@ -34,7 +34,7 @@ export default async function GroupsPage() {
       <NavigationBar />
 
       {/* CONTENT */}
-      <div className="flex flex-1 max-w-7xl mx-auto w-full px-6 py-8 gap-8">
+      <div className="flex flex-1 max-w-7xl mx-auto w-full px-10 py-10 gap-16">
         {/* SIDEBAR */}
         <aside className="w-72 shrink-0">
           <div className="sticky top-24">

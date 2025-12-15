@@ -90,9 +90,25 @@ export default function HomePage() {
 
     if (user) {
       loadMyGroups();
-    } else {
-      setLoading(false);
     }
+  }, [user]);
+
+  // Fetch server session (NextAuth) when no local user
+  useEffect(() => {
+    async function ensureUser() {
+      if (user) return;
+      try {
+        const res = await fetch("/api/me", { cache: "no-store" });
+        if (res.ok) {
+          const me = await res.json();
+          setUser(me);
+          localStorage.setItem("user", JSON.stringify(me));
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+    ensureUser();
   }, [user]);
 
   /* ================= LOADING ================= */
@@ -320,6 +336,5 @@ export default function HomePage() {
 );
 
 }
-
 
 

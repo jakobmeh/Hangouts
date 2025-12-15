@@ -5,6 +5,7 @@ import Image from "next/image";
 import { MdLocationOn } from "react-icons/md";
 import { FiBell } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 import LoginModal from "../components/LoginModal";
 import RegisterModal from "../components/RegisterModal";
@@ -22,9 +23,29 @@ function NavigationBarContent() {
   /* ================= USER SYNC ================= */
 
   useEffect(() => {
-    function syncUser() {
+    async function syncUser() {
+      let parsed = null;
       const stored = localStorage.getItem("user");
-      const parsed = stored ? JSON.parse(stored) : null;
+      if (stored) {
+        try {
+          parsed = JSON.parse(stored);
+        } catch {
+          parsed = null;
+        }
+      }
+
+      // If no local user, try server session (/api/me supports NextAuth)
+      if (!parsed) {
+        try {
+          const res = await fetch("/api/me", { cache: "no-store" });
+          if (res.ok) {
+            parsed = await res.json();
+            localStorage.setItem("user", JSON.stringify(parsed));
+          }
+        } catch {
+          /* ignore */
+        }
+      }
 
       if (parsed && parsed.isAdmin === undefined) {
         fetch("/api/me")
@@ -196,7 +217,10 @@ function NavigationBarContent() {
   }
 
   async function handleLogout() {
-    await fetch("/api/logout", { method: "POST" });
+    // Legacy cookie logout
+    await fetch("/api/logout", { method: "POST" }).catch(() => {});
+    // NextAuth logout
+    await signOut({ redirect: false }).catch(() => {});
     localStorage.removeItem("user");
     window.dispatchEvent(new Event("user-logout"));
     setUser(null);
