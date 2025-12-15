@@ -9,15 +9,24 @@ export async function POST(
   const { id } = await params;
   const eventId = Number(id);
 
+  if (!Number.isFinite(eventId)) {
+    return NextResponse.json({ error: "Invalid event id" }, { status: 400 });
+  }
+
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // ✅ FIX: uporabi SELECT, ne INCLUDE
   const event = await prisma.event.findUnique({
     where: { id: eventId },
-    include: {
-      _count: { select: { attendees: true } },
+    select: {
+      id: true,
+      capacity: true,
+      _count: {
+        select: { attendees: true },
+      },
     },
   });
 
