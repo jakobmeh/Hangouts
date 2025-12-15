@@ -7,6 +7,7 @@ import JoinLeaveButton from "./JoinLeaveButton";
 import DeleteGroupButton from "./DeleteGroupButton";
 import DeleteEventButton from "./DeleteEventButton";
 import CreateEventButton from "./CreateEventButton";
+import GroupChat from "./GroupChat";
 
 import { getCurrentUser } from "@/app/lib/auth";
 
@@ -194,13 +195,7 @@ export default async function GroupPage({
                             )}
 
                             {isEventOwner && (
-                              <>
-                                
-
-                                <DeleteEventButton
-                                  eventId={event.id}
-                                />
-                              </>
+                              <DeleteEventButton eventId={event.id} />
                             )}
                           </div>
                         </div>
@@ -209,6 +204,14 @@ export default async function GroupPage({
                   })}
                 </ul>
               </div>
+
+              {/* GROUP CHAT */}
+              {isMember && (
+                <>
+                  <div className="my-10 border-t" />
+                  <GroupChat groupId={group.id} />
+                </>
+              )}
             </section>
           </div>
         </main>

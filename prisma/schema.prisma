@@ -30,6 +30,8 @@ model User {
   createdEvents Event[]
   attending     Attendee[]
 
+  groupMessages GroupMessage[] 
+
   createdAt DateTime @default(now())
 }
 
@@ -53,6 +55,8 @@ model Group {
   members GroupMember[]
   events  Event[]
 
+ messages GroupMessage[] 
+ 
   createdAt DateTime @default(now())
 }
 
@@ -119,4 +123,16 @@ model Attendee {
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([userId, eventId])
+}
+
+
+model GroupMessage {
+  id        Int      @id @default(autoincrement())
+  content   String
+  userId    Int
+  groupId  Int
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
 }
