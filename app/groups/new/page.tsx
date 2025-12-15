@@ -97,11 +97,11 @@ export default function NewGroupPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* GROUP NAME */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-800 mb-1">
               Group name
             </label>
             <input
-              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="e.g. Hiking Slovenia"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -111,11 +111,11 @@ export default function NewGroupPage() {
 
           {/* DESCRIPTION */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-800 mb-1">
               Description
             </label>
             <textarea
-              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="What is this group about?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -125,11 +125,11 @@ export default function NewGroupPage() {
 
           {/* CITY */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-800 mb-1">
               City
             </label>
             <input
-              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Ljubljana"
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -139,11 +139,11 @@ export default function NewGroupPage() {
 
           {/* COUNTRY */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-800 mb-1">
               Country
             </label>
             <input
-              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Slovenia"
               value={country}
               onChange={(e) => setCountry(e.target.value)}

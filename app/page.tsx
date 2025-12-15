@@ -102,36 +102,58 @@ export default function HomePage() {
 
   /* ================= GUEST ================= */
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-white">
-        <NavigationBar />
+ if (!user) {
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      <NavigationBar />
 
-        <section className="py-20 text-center">
-          <h1 className="text-5xl font-bold mb-6">
-            The 🧑‍🤝‍🧑 people platform.
-          </h1>
+      <section className="flex-1 flex items-center justify-center px-6">
+        <div className="text-center max-w-3xl">
+         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 flex flex-wrap items-center justify-center gap-3">
+  <span>The</span>
 
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Join thousands of people meeting up daily.
+  <span className="inline-flex items-center gap-2 text-blue-600">
+    <img
+      src="/icons/group.png"
+      alt="Group"
+      className="h-10 md:h-20 w-auto align-middle"
+    />
+    people
+  </span>
+
+  <span>platform</span>
+</h1>
+
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10">
+            Join thousands of people meeting up, creating events, and building
+            real connections every day.
           </p>
 
           <button
-            className="mt-6 px-6 py-3 bg-black text-white rounded-full"
+            className="
+              inline-flex items-center justify-center
+              px-8 py-4 rounded-full
+              bg-blue-600 text-white font-semibold
+              shadow-lg shadow-blue-600/30
+              hover:bg-blue-700 hover:shadow-blue-700/40
+              transition-all duration-200
+            "
             onClick={() => setShowRegister(true)}
           >
             Join Meetup
           </button>
-        </section>
+        </div>
+      </section>
 
-        <Footer />
+      <Footer />
 
-        {showRegister && (
-          <RegisterModal onClose={() => setShowRegister(false)} />
-        )}
-      </div>
-    );
-  }
+      {showRegister && (
+        <RegisterModal onClose={() => setShowRegister(false)} />
+      )}
+    </div>
+  );
+}
+
 
   /* ================= LOGGED IN ================= */
 
@@ -204,3 +226,7 @@ export default function HomePage() {
     </div>
   );
 }
+
+
+
+

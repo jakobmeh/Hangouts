@@ -42,10 +42,10 @@ const [capacity, setCapacity] = useState<number | "">("");
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-2xl shadow w-full max-w-lg"
       >
-        <h1 className="text-2xl font-bold mb-6">Create Event</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Create Event</h1>
 
         <input
-          className="w-full border rounded-lg p-3 mb-4"
+          className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-600"
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -53,7 +53,7 @@ const [capacity, setCapacity] = useState<number | "">("");
         />
 
         <textarea
-          className="w-full border rounded-lg p-3 mb-4"
+          className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-600"
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -61,14 +61,14 @@ const [capacity, setCapacity] = useState<number | "">("");
 
         <input
           type="datetime-local"
-          className="w-full border rounded-lg p-3 mb-4"
+          className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-600"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
         />
 
         <input
-          className="w-full border rounded-lg p-3 mb-6"
+          className="w-full border border-gray-300 rounded-lg p-3 mb-6 text-gray-900 placeholder:text-gray-600"
           placeholder="City"
           value={city}
           onChange={(e) => setCity(e.target.value)}
@@ -78,7 +78,7 @@ const [capacity, setCapacity] = useState<number | "">("");
         <input
   type="number"
   min={1}
-  className="w-full border rounded-lg p-3 mb-4"
+  className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-600"
   placeholder="Capacity (optional)"
   value={capacity}
   onChange={(e) =>

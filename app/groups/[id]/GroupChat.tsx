@@ -32,12 +32,14 @@ export default function GroupChat({ groupId }: { groupId: number }) {
 
   return (
     <div className="mt-10">
-      <h2 className="text-xl font-semibold mb-4">Group chat</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Group chat</h2>
 
-      <div className="border rounded-xl p-4 h-64 overflow-y-auto bg-gray-50 space-y-2">
+      <div className="border border-gray-200 rounded-xl p-4 h-64 overflow-y-auto bg-white space-y-2">
         {messages.map((m) => (
-          <div key={m.id}>
-            <span className="font-medium">{m.user.name}: </span>
+          <div key={m.id} className="text-gray-800">
+            <span className="font-semibold text-gray-900">
+              {m.user.name}:
+            </span>{" "}
             <span>{m.content}</span>
           </div>
         ))}
@@ -47,8 +49,8 @@ export default function GroupChat({ groupId }: { groupId: number }) {
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="flex-1 border rounded-lg px-3 py-2"
-          placeholder="Write a message…"
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-600"
+          placeholder="Write a message"
         />
         <button
           type="submit"

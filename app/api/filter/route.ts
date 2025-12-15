@@ -12,13 +12,28 @@ export async function GET(req: Request) {
   const sort = searchParams.get("sort") || ""; 
 
   let events = await prisma.event.findMany({
-    include: { user: true, attendees: true },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      date: true,
+      city: true,
+      country: true,
+      category: true,
+      capacity: true,
+      userId: true,
+      groupId: true,
+      user: {
+        select: { id: true, name: true, email: true },
+      },
+      attendees: true,
+    },
   });
 
  
   if (eventQuery) {
     events = events.filter(e =>
-      e.title.toLowerCase().includes(eventQuery)
+      e.title.toLowerCase().startsWith(eventQuery)
     );
   }
 

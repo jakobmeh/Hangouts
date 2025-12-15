@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { MdLocationOn } from "react-icons/md";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import LoginModal from "../components/LoginModal";
 import RegisterModal from "../components/RegisterModal";
 
-export default function NavigationBar() {
+function NavigationBarContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [user, setUser] = useState<any>(null);
   const [open, setOpen] = useState(false);
@@ -35,6 +36,14 @@ export default function NavigationBar() {
     };
   }, []);
 
+  /* ================= SYNC SEARCH FIELDS FROM URL ================= */
+  useEffect(() => {
+    const event = searchParams.get("event") || "";
+    const city = searchParams.get("city") || "";
+    setEventQuery(event);
+    setCityQuery(city);
+  }, [searchParams]);
+
   /* ================= SEARCH ================= */
 
   const [eventQuery, setEventQuery] = useState("");
@@ -43,21 +52,54 @@ export default function NavigationBar() {
   const [cityResults, setCityResults] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const cityCache = useRef<Map<string, any[]>>(new Map());
+  const abortRef = useRef<AbortController | null>(null);
+  const [cityLoading, setCityLoading] = useState(false);
 
   useEffect(() => {
     async function fetchCities() {
-      if (cityQuery.length < 2) {
+      const query = cityQuery.trim();
+      if (query.length < 2) {
         setCityResults([]);
+        setCityLoading(false);
         return;
       }
 
-      const res = await fetch(`/api/search-location?q=${cityQuery}`);
-      const data = await res.json();
-      setCityResults(data.results || []);
-      setShowDropdown(true);
+      // Cache hit
+      const cached = cityCache.current.get(query.toLowerCase());
+      if (cached) {
+        setCityResults(cached);
+        setShowDropdown(true);
+        setCityLoading(false);
+        return;
+      }
+
+      // Abort previous request
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      setCityLoading(true);
+      try {
+        const res = await fetch(`/api/search-location?q=${encodeURIComponent(query)}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error("Search failed");
+        const data = await res.json();
+        const results = data.results || [];
+        cityCache.current.set(query.toLowerCase(), results);
+        setCityResults(results);
+        setShowDropdown(true);
+      } catch (err) {
+        if ((err as any)?.name !== "AbortError") {
+          setCityResults([]);
+        }
+      } finally {
+        setCityLoading(false);
+      }
     }
 
-    const delay = setTimeout(fetchCities, 300);
+    const delay = setTimeout(fetchCities, 180);
     return () => clearTimeout(delay);
   }, [cityQuery]);
 
@@ -132,27 +174,38 @@ export default function NavigationBar() {
                   className="w-full bg-transparent outline-none px-2 text-sm text-gray-900 placeholder-gray-500"
                 />
 
-                {showDropdown && cityResults.length > 0 && (
+                {showDropdown && (
                   <div className="absolute top-full mt-2 left-0 w-full bg-white border border-gray-300 rounded-2xl shadow-2xl z-[60] overflow-hidden">
                     <div className="max-h-64 overflow-y-auto">
-                      {cityResults.map((loc, i) => (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            setCityQuery(`${loc.city}, ${loc.country}`);
-                            setShowDropdown(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-900 hover:bg-blue-50 transition"
-                        >
-                          <MdLocationOn className="text-blue-600 text-lg" />
-                          <span className="font-medium">
-                            {loc.city}
-                            <span className="text-gray-500 font-normal">
-                              , {loc.country}
+                      {cityLoading && (
+                        <div className="px-4 py-3 text-sm text-gray-500">
+                          Searching...
+                        </div>
+                      )}
+                      {!cityLoading &&
+                        cityResults.map((loc, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              setCityQuery(`${loc.city}, ${loc.country}`);
+                              setShowDropdown(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-900 hover:bg-blue-50 transition"
+                          >
+                            <MdLocationOn className="text-blue-600 text-lg" />
+                            <span className="font-medium">
+                              {loc.city}
+                              <span className="text-gray-500 font-normal">
+                                , {loc.country}
+                              </span>
                             </span>
-                          </span>
-                        </button>
-                      ))}
+                          </button>
+                        ))}
+                      {!cityLoading && cityResults.length === 0 && (
+                        <div className="px-4 py-3 text-sm text-gray-500">
+                          No locations found
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -254,5 +307,13 @@ export default function NavigationBar() {
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {showRegister && <RegisterModal onClose={() => setShowRegister(false)} />}
     </>
+  );
+}
+
+export default function NavigationBar() {
+  return (
+    <Suspense fallback={<div className="h-16 bg-white border-b border-gray-200" />}>
+      <NavigationBarContent />
+    </Suspense>
   );
 }

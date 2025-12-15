@@ -42,9 +42,12 @@ export default function Sidebar({ user }: Props) {
   }, [user]);
 
   return (
-    <aside className="w-64 flex-shrink-0 flex flex-col gap-4">
+    <aside className="w-64 flex-shrink-0 flex flex-col gap-4 self-start">
       {/* USER CARD */}
-      <div className="bg-white p-4 rounded-xl border flex flex-col items-center">
+      <div
+        className="bg-white p-4 rounded-xl border flex flex-col items-center cursor-pointer hover:shadow-md transition"
+        onClick={() => router.push("/profile")}
+      >
         {/* PROFILE IMAGE */}
         <div className="relative w-20 h-20 mb-2">
           {user?.image ? (
@@ -55,7 +58,7 @@ export default function Sidebar({ user }: Props) {
               className="rounded-full object-cover"
             />
           ) : (
-            <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-2xl font-semibold">
+            <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-gray-700 text-2xl font-semibold">
               {user?.name?.[0]?.toUpperCase() || "U"}
             </div>
           )}
@@ -65,34 +68,34 @@ export default function Sidebar({ user }: Props) {
           {user?.name || "Neznan uporabnik"}
         </h2>
 
-        <p className="text-sm text-gray-500">{user?.email}</p>
+        <p className="text-sm text-gray-600">{user?.email}</p>
       </div>
 
       {/* GROUPS + EVENTS */}
       <div className="bg-white p-4 rounded-xl border">
-        <h3 className="font-semibold mb-2">
+        <h3 className="font-semibold text-gray-900 mb-2">
           Your Groups {!loading && groups.length > 0 && `(${groups.length})`}
         </h3>
 
         {loading ? (
-          <p className="text-sm text-gray-400">Loading…</p>
+          <p className="text-sm text-gray-700">Loading...</p>
         ) : groups.length === 0 ? (
-          <p className="text-sm text-gray-400">No groups</p>
+          <p className="text-sm text-gray-700">No groups</p>
         ) : (
-          <ul className="space-y-3 text-sm">
+          <ul className="space-y-3 text-sm text-gray-900">
             {groups.map((g) => (
               <li key={g.id}>
                 {/* GROUP */}
                 <div
                   onClick={() => router.push(`/groups/${g.id}`)}
-                  className="font-medium cursor-pointer hover:text-blue-600 transition"
+                  className="font-semibold cursor-pointer hover:text-blue-600 transition"
                 >
                   {g.name}
                 </div>
 
                 {/* EVENTS */}
                 {g.events.length > 0 && (
-                  <ul className="ml-3 mt-1 space-y-1 text-gray-600">
+                  <ul className="ml-3 mt-1 space-y-1 text-gray-700">
                     {g.events.map((e) => (
                       <li
                         key={e.id}
