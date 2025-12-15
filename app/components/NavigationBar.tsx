@@ -115,11 +115,11 @@ function NavigationBarContent() {
           type: n.type,
           title: n.title,
           meta: n.meta,
-          createdAt: n.createdAt,
+          createdAt: n.createdAt as string,
           link: n.link,
         })) || [];
       setNotifications(items);
-      const fresh = items.filter((n) => new Date(n.createdAt).getTime() > lastSeen).length;
+      const fresh = items.filter((n: { createdAt: string }) => new Date(n.createdAt).getTime() > lastSeen).length;
       setUnread(fresh);
     } catch {
       /* ignore */
