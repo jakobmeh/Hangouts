@@ -24,7 +24,7 @@ model User {
   sessions  Session[]
   
   // Groups
-  ownedGroups Group[]
+  ownedGroups Group[] 
   memberships GroupMember[]
 
   // Events

@@ -3,130 +3,159 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log("🌱 Seeding Hangouts database...");
 
-  // ─────────────────────────────
+  // ─────────────────────────
   // USERS
-  // ─────────────────────────────
-  const admin = await prisma.user.create({
-    data: {
-      email: "admin@hangouts.app",
-      name: "Admin",
-      password: "seeded-password",
-      isAdmin: true,
-    },
+  // ─────────────────────────
+  const users = await prisma.user.createMany({
+    data: [
+      {
+        email: "admin@hangout-jakob.eu",
+        name: "Admin Jakob",
+        image: "https://i.pravatar.cc/150?img=3",
+        password: "seed",
+        isAdmin: true,
+      },
+      {
+        email: "ana@hangout.eu",
+        name: "Ana Novak",
+        image: "https://i.pravatar.cc/150?img=5",
+        password: "seed",
+      },
+      {
+        email: "marko@hangout.eu",
+        name: "Marko Kralj",
+        image: "https://i.pravatar.cc/150?img=8",
+        password: "seed",
+      },
+      {
+        email: "luka@hangout.eu",
+        name: "Luka Zupan",
+        image: "https://i.pravatar.cc/150?img=11",
+        password: "seed",
+      },
+    ],
+    skipDuplicates: true,
   });
 
-  const users = await Promise.all(
-    Array.from({ length: 10 }).map((_, i) =>
-      prisma.user.create({
-        data: {
-          email: `user${i + 1}@hangouts.app`,
-          name: `User ${i + 1}`,
-          password: "seeded-password",
-        },
-      })
-    )
-  );
+  const allUsers = await prisma.user.findMany();
 
-  // ─────────────────────────────
+  // ─────────────────────────
   // GROUPS
-  // ─────────────────────────────
-  const cities = ["Ljubljana", "Maribor", "Koper", "Celje", "Kranj"];
-  const categories = ["Tech", "Sports", "Music", "Startup", "Social"];
+  // ─────────────────────────
+  const groupsData = [
+    {
+      name: "Hiking Slovenia",
+      description: "Weekend hikes and nature exploration 🥾",
+      imageUrl:
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+      city: "Ljubljana",
+      country: "Slovenia",
+    },
+    {
+      name: "Tech & Startups",
+      description: "Meetups for developers and founders 🚀",
+      imageUrl:
+        "https://images.unsplash.com/photo-1521737604893-d14cc237f11d",
+      city: "Maribor",
+      country: "Slovenia",
+    },
+    {
+      name: "Coffee Lovers",
+      description: "Coffee, chill & conversations ☕",
+      imageUrl:
+        "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+      city: "Koper",
+      country: "Slovenia",
+    },
+    {
+      name: "Photography Walks",
+      description: "Street & nature photography 📸",
+      imageUrl:
+        "https://images.unsplash.com/photo-1500534314209-a26db0f5c8a5",
+      city: "Celje",
+      country: "Slovenia",
+    },
+  ];
 
   const groups = [];
 
-  for (let i = 0; i < 8; i++) {
-    const group = await prisma.group.create({
+  for (const group of groupsData) {
+    const created = await prisma.group.create({
       data: {
-        name: `Hangout Group ${i + 1}`,
-        description: `Awesome group number ${i + 1}`,
-        city: cities[i % cities.length],
-        country: "Slovenia",
-        ownerId: admin.id,
+        ...group,
+        ownerId: allUsers[0].id, // admin
       },
     });
-
-    groups.push(group);
-
-    // ─────────────────────────────
-    // GROUP MEMBERS
-    // ─────────────────────────────
-    for (const user of users) {
-      if (Math.random() > 0.4) {
-        await prisma.groupMember.create({
-          data: {
-            userId: user.id,
-            groupId: group.id,
-          },
-        });
-      }
-    }
-
-    // Admin always member
-    await prisma.groupMember.create({
-      data: {
-        userId: admin.id,
-        groupId: group.id,
-      },
-    });
+    groups.push(created);
   }
 
-  // ─────────────────────────────
-  // EVENTS
-  // ─────────────────────────────
+  // ─────────────────────────
+  // GROUP MEMBERS
+  // ─────────────────────────
   for (const group of groups) {
-    for (let i = 0; i < 5; i++) {
+    for (const user of allUsers) {
+      await prisma.groupMember.create({
+        data: {
+          groupId: group.id,
+          userId: user.id,
+        },
+      });
+    }
+  }
+
+  // ─────────────────────────
+  // EVENTS + ATTENDEES
+  // ─────────────────────────
+  for (const group of groups) {
+    for (let i = 1; i <= 4; i++) {
       const event = await prisma.event.create({
         data: {
-          title: `Event ${i + 1} – ${group.name}`,
-          description: "Seeded event for demo purposes",
-          date: new Date(Date.now() + 1000 * 60 * 60 * 24 * (i + 1)),
+          title: `${group.name} Event ${i}`,
+          description: "Great event – join us!",
+          date: new Date(Date.now() + i * 86400000),
           city: group.city,
-          country: "Slovenia",
-          category: categories[i % categories.length],
-          capacity: 10 + i * 5,
-          userId: admin.id,
+          country: group.country || "Slovenia",
+          imageUrl:
+            "https://images.unsplash.com/photo-1515169067865-5387ec356754",
+          category: "Social",
+          capacity: 25,
+          userId: allUsers[0].id,
           groupId: group.id,
         },
       });
 
-      // ─────────────────────────────
-      // ATTENDEES
-      // ─────────────────────────────
-      for (const user of users) {
-        if (Math.random() > 0.5) {
-          await prisma.attendee.create({
-            data: {
-              userId: user.id,
-              eventId: event.id,
-            },
-          });
-        }
+      for (const user of allUsers) {
+        await prisma.attendee.create({
+          data: {
+            userId: user.id,
+            eventId: event.id,
+          },
+        });
       }
     }
   }
 
-  // ─────────────────────────────
+  // ─────────────────────────
   // GROUP MESSAGES
-  // ─────────────────────────────
+  // ─────────────────────────
   for (const group of groups) {
     await prisma.groupMessage.create({
       data: {
-        content: `Welcome to ${group.name}! 🎉`,
-        userId: admin.id,
+        content: "Welcome to the group 👋",
+        userId: allUsers[0].id,
         groupId: group.id,
       },
     });
   }
 
-  console.log("✅ Database seeded with LOTS of data");
+  console.log("✅ Database seeded successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("❌ Seed error:", e);
     process.exit(1);
   })
   .finally(async () => {
