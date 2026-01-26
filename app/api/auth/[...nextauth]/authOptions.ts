@@ -28,7 +28,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     /**
-     * signIn callback - Pozvan ko se user prislavi
+     * signIn callback - Poklican ko se user poskuša prijaviti
      * Vrne true za dovolitev prijave, false za zavrnitev
      * 
      * NAPOMENA: Adapter (PrismaAdapter) že avtomatično ustvari novega user-ja,
@@ -37,6 +37,19 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account, profile, email, credentials }) {
       // Prijava se vedno dovoli (adapter že obdeluje ustvarjanje user-ja)
       return true;
+    },
+
+    /**
+     * redirect callback - Preusmerite user-ja po uspešni prijavi
+     * To je potrebno za pravilno pretvorbo OAuth info v database
+     */
+    async redirect({ url, baseUrl }) {
+      // Če je absolutni URL in je isti kot base URL, dozvoli
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      // Sicer preusmeri na domačo stran
+      return baseUrl;
     },
 
     /**

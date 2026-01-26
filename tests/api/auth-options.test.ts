@@ -28,9 +28,9 @@ describe("authOptions callbacks", () => {
     const result = await authOptions.callbacks?.signIn?.({
       user: { email: "user@example.com", name: "User", image: null } as any,
       account: null,
-      profile: null,
-      email: null,
-      credentials: null,
+      profile: undefined,
+      email: undefined,
+      credentials: undefined,
     });
 
     expect(result).toBe(true);
