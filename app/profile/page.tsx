@@ -90,7 +90,7 @@ export default function ProfilePage() {
         {/* MAIN */}
         <main className="flex-1 flex justify-center">
           <div className="w-full max-w-2xl bg-white rounded-2xl border shadow-sm p-8">
-            <h1 className="text-2xl text-gray-700 font-bold mb-6">Profile settings</h1>
+            <h1 className="text-2xl font-bold mb-6">Profile settings</h1>
 
             <form onSubmit={handleSave} className="space-y-6">
               {/* AVATAR */}
