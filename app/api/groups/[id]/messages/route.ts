@@ -14,7 +14,7 @@ export async function GET(
     orderBy: { createdAt: "asc" },
     include: {
       user: {
-        select: { id: true, name: true },
+        select: { id: true, name: true, image: true },
       },
     },
   });

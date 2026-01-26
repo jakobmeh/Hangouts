@@ -40,12 +40,20 @@ export default function GroupChat({ groupId }: { groupId: number }) {
             key={m.id}
             className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
-              {(m.user?.name || m.user?.email || "?")
-                .toString()
-                .trim()
-                .charAt(0)
-                .toUpperCase() || "?"}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 overflow-hidden">
+              {m.user?.image ? (
+                <img
+                  src={m.user.image}
+                  alt={m.user?.name || "User"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                (m.user?.name || m.user?.email || "?")
+                  .toString()
+                  .trim()
+                  .charAt(0)
+                  .toUpperCase() || "?"
+              )}
             </div>
             <div className="min-w-0">
               <div className="text-sm font-semibold text-gray-900">
