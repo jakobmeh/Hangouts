@@ -167,8 +167,16 @@ export default async function GroupPage({
                       key={m.user.id}
                       className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-gray-200 shadow-sm"
                     >
-                      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
-                        {m.user.name?.[0]?.toUpperCase() || "U"}
+                      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold shrink-0 overflow-hidden">
+                        {m.user.image ? (
+                          <img
+                            src={m.user.image}
+                            alt={m.user.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          m.user.name?.[0]?.toUpperCase() || "U"
+                        )}
                       </div>
                       <span className="font-medium text-gray-900">
                         {m.user.name}
