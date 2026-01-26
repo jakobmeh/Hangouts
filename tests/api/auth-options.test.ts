@@ -1,4 +1,14 @@
 // @vitest-environment node
+/**
+ * AUTH OPTIONS TESTI
+ *
+ * Testira NextAuth callback-e:
+ * 1. signIn - Dovolitev ali zavrnitev prijave
+ * 2. session - Dodaj admin info v session
+ * 
+ * NAPOMENA: Uporabimo database session strategy, zato JWT callback ni testiran
+ */
+
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { prisma, resetPrisma } from "@/tests/mocks/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
@@ -10,10 +20,11 @@ describe("authOptions callbacks", () => {
     resetPrisma();
   });
 
-  it("creates user on first Google sign-in", async () => {
-    prisma.user.findUnique.mockResolvedValue(null);
-    prisma.user.create.mockResolvedValue({ id: 1 });
-
+  /**
+   * Test: signIn callback - Vedno vrne true
+   * (Adapter že obdeluje креирање user-ja)
+   */
+  it("signIn callback vedno dovoli prijavo", async () => {
     const result = await authOptions.callbacks?.signIn?.({
       user: { email: "user@example.com", name: "User", image: null } as any,
       account: null,
@@ -23,27 +34,34 @@ describe("authOptions callbacks", () => {
     });
 
     expect(result).toBe(true);
-    expect(prisma.user.create).toHaveBeenCalled();
   });
 
-  it("adds admin info to jwt", async () => {
-    prisma.user.findUnique.mockResolvedValue({
+  /**
+   * Test: session callback - Dodaj admin info in id v session
+   */
+  it("session callback dodaj admin info v session", async () => {
+    const sessionObject = {
+      user: { email: "admin@example.com", name: "Admin" },
+      expires: new Date().toISOString(),
+    };
+
+    const userObject = {
       id: 1,
       isAdmin: true,
       name: "Admin",
       image: null,
+      email: "admin@example.com",
+    };
+
+    const result = await authOptions.callbacks?.session?.({
+      session: sessionObject as any,
+      user: userObject as any,
+      newSession: undefined,
+      token: undefined,
+      trigger: "update",
     });
 
-    const token = await authOptions.callbacks?.jwt?.({
-      token: { email: "admin@example.com" },
-      user: null,
-      account: null,
-      profile: null,
-      trigger: "signIn",
-      session: null,
-    });
-
-    expect((token as any).isAdmin).toBe(true);
-    expect((token as any).id).toBe(1);
+    expect((result as any).user.id).toBe(1);
+    expect((result as any).user.isAdmin).toBe(true);
   });
 });

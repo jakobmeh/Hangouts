@@ -43,7 +43,7 @@ describe("ProfilePage", () => {
       target: { value: "New Name" },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       "/api/me",
