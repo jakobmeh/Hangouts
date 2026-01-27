@@ -16,9 +16,9 @@ model User {
   id            Int     @id @default(autoincrement())
   email         String  @unique
   name          String?
-  image         String?   // 👈 PROFILKA (URL)
-  password      String?   // 👈 OPCIONO - OAuth uporabniki  nimajo gesla
-  emailVerified DateTime?  // 👈 NEXTAUTH - Ko je email verificiran
+  image         String?   //  PROFILKA (URL)
+  password      String?   //  OPCISKO - OAuth uporabniki  nimajo gesla
+  emailVerified DateTime?  // NEXTAUTH - Ko je email verificiran
   isAdmin       Boolean @default(false)
 
   accounts  Account[]
