@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:ci": "vitest run --coverage && playwright test",
-    "test:seed": "ts-node prisma/seed-e2e.ts"
+    "test:seed": "ts-node prisma/seed-e2e.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
