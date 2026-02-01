@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import bcrypt from "bcrypt";
 
 export async function POST(req: Request) {
   try {
@@ -23,7 +24,17 @@ export async function POST(req: Request) {
       );
     }
 
-    if (user.password !== password) {
+    // Check if user has a password (OAuth users might not)
+    if (!user.password) {
+      return NextResponse.json(
+        { message: "Uporabnik nima gesla. Prijavite se z OAuth." },
+        { status: 400 }
+      );
+    }
+
+    // Compare hashed password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
       return NextResponse.json(
         { message: "Napačno geslo." },
         { status: 401 }
