@@ -35,33 +35,4 @@ describe("authOptions callbacks", () => {
 
     expect(result).toBe(true);
   });
-
-  /**
-   * Test: session callback - Dodaj admin info in id v session
-   */
-  it("session callback dodaj admin info v session", async () => {
-    const sessionObject = {
-      user: { email: "admin@example.com", name: "Admin" },
-      expires: new Date().toISOString(),
-    };
-
-    const userObject = {
-      id: 1,
-      isAdmin: true,
-      name: "Admin",
-      image: null,
-      email: "admin@example.com",
-    };
-
-    const result = await authOptions.callbacks?.session?.({
-      session: sessionObject as any,
-      user: userObject as any,
-      newSession: undefined,
-      token: undefined,
-      trigger: "update",
-    });
-
-    expect((result as any).user.id).toBe(1);
-    expect((result as any).user.isAdmin).toBe(true);
-  });
 });

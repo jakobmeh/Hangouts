@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import bcrypt from "bcrypt";
 import { jsonRequest } from "@/tests/helpers/request";
 import { POST as login } from "@/app/api/login/route";
 import { POST as register } from "@/app/api/register/route";
@@ -47,7 +48,7 @@ describe("auth routes", () => {
       id: 1,
       email: "user@example.com",
       name: "User",
-      password: "pass",
+      password: "$2b$12$ZGjFQrFFFroYdnFPjT5xDupMoBYT86LGv13ifTzuV00Rbd3x05JBi",
       isAdmin: false,
       image: null,
     });

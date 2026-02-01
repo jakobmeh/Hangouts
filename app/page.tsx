@@ -235,6 +235,13 @@ export default function HomePage() {
           shadow-sm
           p-8
         ">
+          {/* WELCOME MESSAGE */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Welcome, {user.name}!
+            </h2>
+          </div>
+
           {/* HEADER */}
           <div className="flex items-center justify-between mb-8">
             <div>

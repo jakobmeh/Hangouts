@@ -1,9 +1,13 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Seeding Hangouts database...");
+
+  // Hash the seed password
+  const hashedPassword = await bcrypt.hash("seed", 12);
 
   // ─────────────────────────
   // USERS
@@ -14,26 +18,26 @@ async function main() {
         email: "admin@hangout-jakob.eu",
         name: "Admin Jakob",
         image: "https://i.pravatar.cc/150?img=3",
-        password: "seed",
+        password: hashedPassword,
         isAdmin: true,
       },
       {
         email: "ana@hangout.eu",
         name: "Ana Novak",
         image: "https://i.pravatar.cc/150?img=5",
-        password: "seed",
+        password: hashedPassword,
       },
       {
         email: "marko@hangout.eu",
         name: "Marko Kralj",
         image: "https://i.pravatar.cc/150?img=8",
-        password: "seed",
+        password: hashedPassword,
       },
       {
         email: "luka@hangout.eu",
         name: "Luka Zupan",
         image: "https://i.pravatar.cc/150?img=11",
-        password: "seed",
+        password: hashedPassword,
       },
     ],
     skipDuplicates: true,
