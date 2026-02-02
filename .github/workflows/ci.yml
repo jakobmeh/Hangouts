@@ -43,6 +43,7 @@ jobs:
         npm run test:seed
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/hangouts_test
+        ALLOW_E2E_SEED: "1"
 
     - name: Run unit tests
       run: npm run test:unit
