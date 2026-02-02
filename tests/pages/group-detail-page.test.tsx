@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GroupPage from "@/app/groups/[id]/page";
+import { prisma, resetPrisma } from "@/tests/mocks/prisma";
 
 vi.mock("@/app/components/NavigationBar", () => ({
   default: () => <div data-testid="nav" />,
@@ -39,12 +40,10 @@ vi.mock("@/app/groups/[id]/GroupChat", () => ({
   default: () => <div>Group chat</div>,
 }));
 
-const { prisma, resetPrisma } = vi.hoisted(() => {
-  const mod = require("../mocks/prisma.ts");
-  return mod;
+vi.mock("@/app/lib/prisma", async () => {
+  const mod = await import("@/tests/mocks/prisma");
+  return { prisma: mod.prisma };
 });
-
-vi.mock("@/app/lib/prisma", () => ({ prisma }));
 
 const { getCurrentUser } = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),

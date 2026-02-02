@@ -4,13 +4,12 @@ import { GET as filterEvents } from "@/app/api/filter/route";
 import { GET as searchLocation } from "@/app/api/search-location/route";
 import { GET as notifications } from "@/app/api/notifications/route";
 import { GET as myGroups } from "@/app/api/me/groups/route";
+import { prisma, resetPrisma } from "@/tests/mocks/prisma";
 
-const { prisma, resetPrisma } = vi.hoisted(() => {
-  const mod = require("../mocks/prisma.ts");
-  return mod;
+vi.mock("@/app/lib/prisma", async () => {
+  const mod = await import("@/tests/mocks/prisma");
+  return { prisma: mod.prisma };
 });
-
-vi.mock("@/app/lib/prisma", () => ({ prisma }));
 
 const { getCurrentUser } = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),

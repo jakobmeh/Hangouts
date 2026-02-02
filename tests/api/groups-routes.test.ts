@@ -7,13 +7,12 @@ import { POST as joinGroup } from "@/app/api/groups/[id]/join/route";
 import { POST as leaveGroup } from "@/app/api/groups/[id]/leave/route";
 import { POST as createEvent } from "@/app/api/groups/[id]/events/route";
 import { GET as getMessages, POST as postMessage } from "@/app/api/groups/[id]/messages/route";
+import { prisma, resetPrisma } from "@/tests/mocks/prisma";
 
-const { prisma, resetPrisma } = vi.hoisted(() => {
-  const mod = require("../mocks/prisma.ts");
-  return mod;
+vi.mock("@/app/lib/prisma", async () => {
+  const mod = await import("@/tests/mocks/prisma");
+  return { prisma: mod.prisma };
 });
-
-vi.mock("@/app/lib/prisma", () => ({ prisma }));
 
 const { getCurrentUser } = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
