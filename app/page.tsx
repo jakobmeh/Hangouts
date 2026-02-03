@@ -194,7 +194,7 @@ export default function HomePage() {
               "
             >
               Join Meetup
-            </button>
+            </button>         
           </div>
         </section>
 
