@@ -193,8 +193,8 @@ export default function HomePage() {
                 transition-all duration-200
               "
             >
-              Join Meetup
-            </button>
+              Join Meetups
+            </button>         
           </div>
         </section>
 
